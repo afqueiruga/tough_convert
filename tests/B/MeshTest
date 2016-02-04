@@ -1,0 +1,34 @@
+Meshmaker test: Cartesian grid
+>>>GENERAL_INFO
+&Grid_Specifications coordinate_system  = 'car', 
+                     output_file_format = 'old', 
+                     length_units       = 'm', 
+                     grid_numbering_system  = 'Layer',
+		     MaxNum_X_Subdivisions = 100,
+ 		     MaxNum_Y_Subdivisions = 100,
+     		     MaxNum_Z_Subdivisions = 100,
+                     ElemName_NumCharacters = 5,
+		     vtk_output                   = .TRUE.
+		     /
+<<<
+
+>>>DISCRETIZATION
+:::>>>X-DISCRETIZATION &DX_Subsets num_DX_subsets = 1 /
+     &DX_data  number_of_DXs = 10, 
+               equal_size    = .TRUE.,
+               Delta_X       = 5.0e-1
+               /
+:::<<<
+:::>>>Y-DISCRETIZATION &DY_Subsets num_DY_subsets = 1 /
+     &DY_data  number_of_DYs = 10, 
+               equal_size    = .TRUE.,
+               Delta_Y       = 5.0e-1
+               /
+:::<<<
+:::>>>Z-DISCRETIZATION &DZ_Subsets num_DZ_subsets = 1 /
+     &DZ_data  number_of_DZs = 10, 
+               equal_size    = .TRUE.,
+               Delta_Z       = 5.0e-1
+               /
+:::<<<
+<<<
