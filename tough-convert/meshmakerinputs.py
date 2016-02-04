@@ -4,22 +4,37 @@ class Tough_Mesh():
     def __init__(self):
         pass
     
-def load_tough_mesh(fname):
+def load_tough_mesh(fname, read_conne = False):
     """
     Loads the dual-mesh graph (cell-cell) that TOUGH uses directly
     It's stored as two tables
     
     fname should be the MESH file
     """
-    # 
 
-    cells = []
+    cells = {}
 
     f = open(fname,"r")
-    f.next()
-    
+    f.next() # Eat the ELEME block
+    for l in f:
+        if not l.strip() or l[0:5]=="CONNE": break # The end of the ELEME block
+
+        name = l[0:5]
+        if len(l)<71:
+            X = np.array([ l[50:60],l[60:70] ], dtype=np.double)
+        else:
+            X = np.array([ l[50:60],l[60:70],l[70:80] ], dtype=np.double)
+        group = l[13:18]
+        cells[name] = (X, group)
+        
     f.close()
     
+    if not read_conne:
+        return cells
+
+    return cells
+
+
 def load_tough_corners(fname):
     """
     Load the mesh of the domain; discared by default. Use VTK_output = .TRUE. to obtain from MeshMaker_V2
@@ -50,8 +65,7 @@ def load_tough_corners(fname):
         npverts[i-1,:] = v
     
     return npverts, cells
-    # from IPython import embed
-    # embed()
+
     
 def load_tough_inconn(fname):
     """
