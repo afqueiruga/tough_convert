@@ -1,0 +1,14 @@
+* MeshMaker_V2 does not support CORNERS for cylindrical systems
+* Design timestep read-output loop for plot_data_elem
+* Silo output
+* VTK field output
+* read in connections from MESH
+* dual-graph output
+  Read in A and V and n and w/e else in there
+* FLAC3D conversion
+  Option for wedge or slab
+* Make an INCONN in tests
+* Make a cylindrical test case
+* Test case for FLAC3D format
+* Handling of parallel tough output:
+  Should tough-convert do stitching? Or just translate into parallel formats with multiple instances of tough-convert?
