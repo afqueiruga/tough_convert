@@ -7,15 +7,23 @@ class Tough_Mesh():
 def load_tough_mesh(fname, read_conne = False):
     """
     Loads the dual-mesh graph (cell-cell) that TOUGH uses directly
-    It's stored as two tables
-    
+    It's stored as three tables:
+    Name-to-index dictionary
+    cell-centers packed and ordered by index
+    cell properties packed and ordered by index
+    index-to-index connection graph
+
     fname should be the MESH file
     """
 
-    cells = {}
-
+    cell_centers = []
+    cell_names = {}
+    cell_groups = []
+    conne = []
+    
     f = open(fname,"r")
-    f.next() # Eat the ELEME block
+    f.next() # Eat the ELEME header
+    itr = 0
     for l in f:
         if not l.strip() or l[0:5]=="CONNE": break # The end of the ELEME block
 
@@ -25,14 +33,30 @@ def load_tough_mesh(fname, read_conne = False):
         else:
             X = np.array([ l[50:60],l[60:70],l[70:80] ], dtype=np.double)
         group = l[13:18]
-        cells[name] = (X, group)
+        cell_centers.append(X)
         
-    f.close()
+        cell_names[name] = itr 
+        cell_groups.append(group)
+        itr += 1
+    cell_centers = np.vstack( cell_centers )
     
-    if not read_conne:
-        return cells
+    # Is that all we wanted?
+    if read_conne:
+        # Chew to the CONNE block
+        while True:
+            if l[0:5]=="CONNE":
+                break
+            l=f.next()
 
-    return cells
+        # Read in connections
+        for l in f:
+            if not l.strip() or l[0]=="<" or l[0] == ">": break
+            conne.append( np.array( [cell_names[l[0:5]], cell_names[l[5:10]] ] , dtype=np.intc ) )
+
+        conne = np.vstack( conne )
+    
+    f.close()
+    return cell_centers, cell_names, cell_groups, conne
 
 
 def load_tough_corners(fname):
@@ -56,6 +80,7 @@ def load_tough_corners(fname):
             elem = []
             enum = int(sp[-1])
         elem.append( int(sp[ndim]) )
+    cells[enum] = elem # Push the last elem that wasn't triggered
     cells.pop(-1) # Frist loop fringe case
     f.close()
     
@@ -63,8 +88,10 @@ def load_tough_corners(fname):
     npverts = np.empty((len(verts),ndim),dtype=np.double)
     for i,v in verts.iteritems():
         npverts[i-1,:] = v
-    
-    return npverts, cells
+    npcells = np.empty((len(cells),len(cells[1])),dtype=np.intc)
+    for i,v in cells.iteritems():
+        npcells[i-1,:] = [j-1 for j in v]
+    return npverts, npcells
 
     
 def load_tough_inconn(fname):
