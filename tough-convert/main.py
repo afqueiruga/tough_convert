@@ -5,29 +5,50 @@ from vtk_writer import *
 
 def main():
     parser = argparse.ArgumentParser(description='Convert TOUGH meshes and data output to common formats')
-
     parser.add_argument("MESH")
-    parser.add_argument("CORNERS")
-    parser.add_argument("--order",nargs=1)
-    parser.add_argument("--data",nargs="+")
-    parser.add_argument("--vtk",nargs="+")
-    parser.add_argument("--silo",nargs="+")
-    parser.add_argument("--flac3d",nargs="+")
+    parser.add_argument("--corners",type=str)
+    parser.add_argument("--order",type=str)
+    parser.add_argument("--data",type=str)
+    parser.add_argument("--vtk", type=str)
+    parser.add_argument("--silo", type=str)
+    parser.add_argument("--flac3d", type=str)
+    arg = parser.parse_args()
     
-    ag = parser.parse_args()
-    print ag
-    # Read in Mesh components
-    cells = load_tough_mesh(ag.MESH)
-    corners,elems = load_tough_corners(ag.CORNERS)
+    # Read in Mesh components. Reading CONNE is not needed if CORNERS is supplied.
+    if arg.corners:
+        cell_centers, cell_names, cell_groups, group_keys, _  = load_tough_mesh(arg.MESH)
+        corners,elems = load_tough_corners(arg.corners)
+    else:
+        cell_centers, cell_names, cell_groups, group_keys, conne = load_tough_mesh(arg.MESH, True)
+    if arg.order:
+        order = load_tough_incon(arg.order)
+        # Shuffle the mesh correspondingly
+    print group_keys
+    
+    # We just want the meshes if there is no data.
+    if arg.data == None:
+        if arg.vtk:
+            # Verify extension
+            if arg.vtk[-4:]!=".vtk":
+                arg.vtk += ".vtk"
+            # Write either the real mesh or the dual-graph, depending on whether or not we were given corners
+            if arg.corners:
+                vtk_write_mesh(arg.vtk, corners,elems, {"Groups":cell_groups})
+            else:
+                vtk_write_mesh(arg.vtk, cell_centers, conne,  {"Groups":cell_groups})
+        if arg.silo:
+            pass
+    # Flac3D is indifferent to wether or not there is data:
+    if arg.flac3d:
+        pass
 
-    # Flac3D doesn't need data to be read in:
-    print ag.flac3d
-    print ag.data
-    print ag.vtk
-    print ag.silo
-    # Read in optional data fields: determine if a timestep loop needs to be taken for memory effeciency
     
-    # Output formats
+    # Take a time step loop for the data
+    # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
+    # The reader for plot data elem is an iterator to handle this.
+    for tstepdata in []:
+        pass
+    
     
 if __name__=="__main__":
     main()

@@ -1,5 +1,7 @@
 import numpy as np
 
+from itertools import count
+from collections import defaultdict
 class Tough_Mesh():
     def __init__(self):
         pass
@@ -19,6 +21,8 @@ def load_tough_mesh(fname, read_conne = False):
     cell_centers = []
     cell_names = {}
     cell_groups = []
+    keygen = count()
+    group_key = defaultdict( lambda : keygen.next() )
     conne = []
     
     f = open(fname,"r")
@@ -28,18 +32,19 @@ def load_tough_mesh(fname, read_conne = False):
         if not l.strip() or l[0:5]=="CONNE": break # The end of the ELEME block
 
         name = l[0:5]
-        if len(l)<71:
-            X = np.array([ l[50:60],l[60:70] ], dtype=np.double)
+        x,y,z = l[50:60],l[60:70],l[70:80]
+        if not y.strip():
+            X = np.array([ x,z ], dtype=np.double)
         else:
-            X = np.array([ l[50:60],l[60:70],l[70:80] ], dtype=np.double)
-        group = l[13:18]
+            X = np.array([ x,y,z ], dtype=np.double)
+        group = l[15:20]
         cell_centers.append(X)
         
         cell_names[name] = itr 
-        cell_groups.append(group)
+        cell_groups.append(group_key[group])
         itr += 1
     cell_centers = np.vstack( cell_centers )
-    
+    cell_groups = np.array(cell_groups,np.intc)
     # Is that all we wanted?
     if read_conne:
         # Chew to the CONNE block
@@ -56,7 +61,7 @@ def load_tough_mesh(fname, read_conne = False):
         conne = np.vstack( conne )
     
     f.close()
-    return cell_centers, cell_names, cell_groups, conne
+    return cell_centers, cell_names, cell_groups, group_key, conne
 
 
 def load_tough_corners(fname):
@@ -94,7 +99,7 @@ def load_tough_corners(fname):
     return npverts, npcells
 
     
-def load_tough_inconn(fname):
+def load_tough_incon(fname):
     """
     Read the inconn file to determine node ordering.
     This routine neglects the intial data; see XXX() in XXX.py
