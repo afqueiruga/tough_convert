@@ -16,15 +16,18 @@ def main():
     arg = parser.parse_args()
     
     # Read in Mesh components. Reading CONNE is not needed if CORNERS is supplied.
-    if arg.corners:
-        cell_centers, cell_names, cell_groups, group_keys, _  = load_tough_mesh(arg.MESH)
-        corners,elems = load_tough_corners(arg.corners)
-    else:
-        cell_centers, cell_names, cell_groups, group_keys, conne = load_tough_mesh(arg.MESH, True)
-    if arg.order:
-        order = load_tough_incon(arg.order)
+    #if arg.corners:
+    #    cell_centers, cell_names, cell_groups, group_keys, _  = load_tough_mesh(arg.MESH)
+    #    corners,elems = load_tough_corners(arg.corners)
+    #else:
+    #    cell_centers, cell_names, cell_groups, group_keys, conne = load_tough_mesh(arg.MESH, True)
+    #if arg.order:
+    #    order = load_tough_incon(arg.order)
         # Shuffle the mesh correspondingly
-    print group_keys
+    TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order )
+    from IPython import embed
+    embed()
+    print TMesh.group_key
     
     # We just want the meshes if there is no data.
     if arg.data == None:
@@ -34,9 +37,9 @@ def main():
                 arg.vtk += ".vtk"
             # Write either the real mesh or the dual-graph, depending on whether or not we were given corners
             if arg.corners:
-                vtk_write_mesh(arg.vtk, corners,elems, {"Groups":cell_groups})
+                vtk_write_mesh(arg.vtk, TMesh.corners, TMesh.elems, cellfields={"Groups": TMesh.groups})
             else:
-                vtk_write_mesh(arg.vtk, cell_centers, conne,  {"Groups":cell_groups})
+                vtk_write_mesh(arg.vtk, TMesh.centers, TMesh.conne,  nodefields={"Groups": TMesh.groups})
         if arg.silo:
             pass
     # Flac3D is indifferent to wether or not there is data:
@@ -49,14 +52,15 @@ def main():
     # The reader for plot data elem is an iterator to handle this.
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data)):
+            print "Processing step ",t
             if arg.vtk[-4:]!=".vtk":
                 oname += "_{0}.vtk".format(t)
             else:
                 oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
             if arg.corners:
-                vtk_write_mesh(oname, corners,elems, {"Groups":cell_groups}, step)
+                vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields={"Groups":cell_groups}) # WRONG
             else:
-                vtk_write_mesh(oname, cell_centers, conne,  step)
+                vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
     
     
 if __name__=="__main__":

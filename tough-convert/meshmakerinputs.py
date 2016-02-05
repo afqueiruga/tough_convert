@@ -2,10 +2,52 @@ import numpy as np
 
 from itertools import count
 from collections import defaultdict
+
 class Tough_Mesh():
-    def __init__(self):
-        pass
-    
+    """
+    A container class for all the mesh objects. 
+    Not super-neccessary since only one is loaded into memory at a time, but helped keep track with order-shuffling.
+    Calls the routines below upon init to fill in its members. Will shuffle itself--overwriting mesh order--before
+    returning from init.
+    """
+    def __init__(self, mname,cname=None,iname=None ):
+        self.centers, self.names, self.groups, self.group_key, self.conne \
+            = load_tough_mesh(mname, not cname) # None evaluates False
+        if cname:
+            self.corners,self.elems = load_tough_corners(cname)
+        else:
+            self.corners,self.elems = None,None
+            
+        if iname:
+            name2index,index2name = load_tough_incon(iname)
+
+            new2old = make_shuffler( index2name, self.names )
+            self.centers = shuffle(new2old, self.centers)
+            #self.names = shuffle(new2old, self.names)
+            self.names = name2index
+            self.groups = shuffle(new2old, self.groups)
+            if self.conne != None: translate(new2old, self.conne)
+            if self.elems != None: self.elems = shuffle(new2old, self.elems)
+
+        
+            
+def make_shuffler(new2name, name2old):
+    new2old = np.empty( (len(new2name),) ,dtype=np.intc)
+    #from IPython import embed
+    #embed()
+    for new,name in enumerate(new2name):
+        new2old[new] = name2old[name]
+    return new2old
+
+def shuffle(new2old, oldarr):
+    newarr = np.empty(oldarr.shape,oldarr.dtype)
+    newarr[ new2old ] = oldarr[:]
+    return newarr
+
+def translate(new2old, arr):
+    for j,v in enumerate(arr):
+        arr[j] = new2old[ v ]
+
 def load_tough_mesh(fname, read_conne = False):
     """
     Loads the dual-mesh graph (cell-cell) that TOUGH uses directly
@@ -109,14 +151,16 @@ def load_tough_incon(fname):
     """
     incon = open(fname,"r")
     incon.next()
-    orderdict = {}
+    name2index = {}
+    index2name = []
     itr = 1
     while True:
         l = incon.next()
         if l[0] == "<" or l[0]==":": break
         name = l[0:5]
-        orderdict[name] = itr
+        name2index[name] = itr
+        index2name.append( name )
         itr+=1
         incon.next()
     incon.close()
-    return orderdict
+    return name2index, index2name
