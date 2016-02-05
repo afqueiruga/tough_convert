@@ -45,7 +45,8 @@ def load_tough_mesh(fname, read_conne = False):
         itr += 1
     cell_centers = np.vstack( cell_centers )
     cell_groups = np.array(cell_groups,np.intc)
-    # Is that all we wanted?
+    
+    # Conditionally read connections
     if read_conne:
         # Chew to the CONNE block
         while True:

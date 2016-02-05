@@ -30,20 +30,27 @@ def vtk_write_mesh(fname, X, elems, nodefields=None, cellfields=None):
     for el in elems:
         fh.write("{0}\n".format(celltypekey[elems.shape[1]]))
 
-    # Node fields now
+    # Macro to write a data block
+    def PUTFIELD(n,f):
+        if len(f.shape)==1 or f.shape[1]==1:
+            fh.write("SCALARS {0} double\n".format(n))
+            fh.write("LOOKUP_TABLE default\n")
+            for l in f:
+                fh.write(str(l)+"\n")
+        else:
+            fh.write("VECTORS {0} double\n".format(n))
+            for l in f:
+                fh.write(vecfmt.format(*l))
+    
+    # Dump all of the node fields
     if nodefields:
         fh.write("POINT_DATA {0}\n".format(X.shape[0]))
         for n,f in nodefields.iteritems():
-            if len(f.shape)==1 or f.shape[1]==1:
-                fh.write("SCALARS {0} double\n".format(n))
-                fh.write("LOOKUP_TABLE default\n")
-                for l in f:
-                    fh.write(str(l)+"\n")
-            else:
-                fh.write("VECTORS {0} double\n".format(n))
-                for l in f:
-                    fh.write(vecfmt.format(*l))
-
+            PUTFIELD(n,f)
     # Cell fields now
-    
+    if cellfields:
+        fh.write("CELL_DATA {0}\n".format(elems.shape[0]))
+        for n,f in cellfields.iteritems():
+            PUTFIELD(n,f)
+            
     fh.close()
