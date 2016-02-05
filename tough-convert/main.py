@@ -2,6 +2,7 @@ import argparse
 
 from meshmakerinputs import *
 from vtk_writer import *
+from read_tough_data import *
 
 def main():
     parser = argparse.ArgumentParser(description='Convert TOUGH meshes and data output to common formats')
@@ -46,8 +47,16 @@ def main():
     # Take a time step loop for the data
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
     # The reader for plot data elem is an iterator to handle this.
-    for tstepdata in []:
-        pass
+    if arg.data:
+        for t,step in enumerate(load_plot_data_elem(arg.data)):
+            if arg.vtk[-4:]!=".vtk":
+                oname += "_{0}.vtk".format(t)
+            else:
+                oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
+            if arg.corners:
+                vtk_write_mesh(oname, corners,elems, {"Groups":cell_groups}, step)
+            else:
+                vtk_write_mesh(oname, cell_centers, conne,  step)
     
     
 if __name__=="__main__":
