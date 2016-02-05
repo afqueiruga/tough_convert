@@ -25,9 +25,9 @@ def main():
     #    order = load_tough_incon(arg.order)
         # Shuffle the mesh correspondingly
     TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order )
-    from IPython import embed
-    embed()
-    print TMesh.group_key
+
+    
+    print "Groups are output according to the following key: ", TMesh.group_key
     
     # We just want the meshes if there is no data.
     if arg.data == None:

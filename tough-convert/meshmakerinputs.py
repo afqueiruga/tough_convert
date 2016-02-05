@@ -21,32 +21,35 @@ class Tough_Mesh():
         if iname:
             name2index,index2name = load_tough_incon(iname)
 
-            new2old = make_shuffler( index2name, self.names )
-            self.centers = shuffle(new2old, self.centers)
-            #self.names = shuffle(new2old, self.names)
+            old2new = make_shuffler( index2name, self.names )
+            self.centers = shuffle(old2new, self.centers)
+            #self.names = shuffle(old2new, self.names)
             self.names = name2index
-            self.groups = shuffle(new2old, self.groups)
-            if self.conne != None: translate(new2old, self.conne)
-            if self.elems != None: self.elems = shuffle(new2old, self.elems)
+            self.groups = shuffle(old2new, self.groups)
+            if self.conne != None: translate(old2new, self.conne)
+            if self.elems != None: self.elems = shuffle(old2new, self.elems)
 
         
             
 def make_shuffler(new2name, name2old):
-    new2old = np.empty( (len(new2name),) ,dtype=np.intc)
+    new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed
     #embed()
     for new,name in enumerate(new2name):
         new2old[new] = name2old[name]
-    return new2old
+    old2new = np.empty( new2old.shape, dtype=np.intc )
+    for i,v in enumerate(new2old):
+        old2new[v] = i
+    return old2new
 
-def shuffle(new2old, oldarr):
+def shuffle(old2new, oldarr):
     newarr = np.empty(oldarr.shape,oldarr.dtype)
-    newarr[ new2old ] = oldarr[:]
+    newarr[ old2new ] = oldarr[ : ]
     return newarr
 
-def translate(new2old, arr):
+def translate(old2new, arr):
     for j,v in enumerate(arr):
-        arr[j] = new2old[ v ]
+        arr[j] = old2new[ v ] # NEED TO FLIP THIS
 
 def load_tough_mesh(fname, read_conne = False):
     """
@@ -153,7 +156,7 @@ def load_tough_incon(fname):
     incon.next()
     name2index = {}
     index2name = []
-    itr = 1
+    itr = 0
     while True:
         l = incon.next()
         if l[0] == "<" or l[0]==":": break
