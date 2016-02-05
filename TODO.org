@@ -1,16 +1,21 @@
 * TODO MeshMaker_V2 does not support CORNERS for cylindrical systems
   Should MeshMaker be in this repo? Should the repo be renamed MeshMaker, and tough-convert be a utility bundled with it?
-* TODO Design timestep read-output loop for plot_data_elem
+** TODO Make a cylindrical test case
 * TODO Silo output
-* TODO VTK field output
-* TODO read in connections from MESH
-* TODO dual-graph output
-  Read in A and V and n and w/e else in there
 * TODO FLAC3D conversion
   Option for wedge or slab
 * TODO Make an INCONN in tests
   Test cases should be small enough to fit in a repo
-* TODO Make a cylindrical test case
 * TODO Test case for FLAC3D format
 * TODO Handling of parallel tough output:
   Should tough-convert do stitching? Or just translate into parallel formats with multiple instances of tough-convert?
+* TODO FUTURE Converting from other formats _into_ TOUGH mesh.
+  I.e., use another mesher and then generate the dual-graph to read into TOUGH.
+
+* DONE dual-graph output
+** TODO Read in A and V and n and w/e else is in there
+  
+* DONE Design timestep read-output loop for plot_data_elem
+* DONE VTK field output
+* DONE read in connections from MESH
+
