@@ -19,7 +19,7 @@ class Tough_Mesh():
             self.corners,self.elems = None,None
             
         if iname:
-            name2index,index2name = load_tough_incon(iname)
+            name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
 
             old2new = make_shuffler( index2name, self.names )
             self.centers = shuffle(old2new, self.centers)
@@ -70,7 +70,7 @@ def load_tough_mesh(fname, read_conne = False):
     group_key = defaultdict( lambda : keygen.next() )
     conne = []
 
-    namelength = 8
+    namelength = -1
     f = open(fname,"r")
     f.next() # Eat the ELEME header
     itr = 0
@@ -78,6 +78,10 @@ def load_tough_mesh(fname, read_conne = False):
         if not l.strip(): continue
         if l[0:5]=="CONNE": break # The end of the ELEME block
 
+        # We need to figure out how long element names are
+        if namelength == -1:
+            namelength = l.find(" ")
+        
         name = l[0:namelength]
         x,y,z = l[50:60],l[60:70],l[70:80]
         if not y.strip():
@@ -149,7 +153,7 @@ def load_tough_corners(fname):
     return npverts, npcells
 
     
-def load_tough_incon(fname):
+def load_tough_incon(fname, namelength=-1):
     """
     Read the inconn file to determine node ordering.
     This routine neglects the intial data; see XXX() in XXX.py
@@ -161,9 +165,11 @@ def load_tough_incon(fname):
     name2index = {}
     index2name = []
     itr = 0
-    namelength = 8 # TODO: AD-HOC
+    # namelength = 8 # TODO: AD-HOC
     while True:
         l = incon.next()
+        if namelength == -1:
+            namelength = l.find(" ")
         if l[0] == "<" or l[0]==":": break
         name = l[0:namelength]
         name2index[name] = itr
