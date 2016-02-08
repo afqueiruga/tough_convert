@@ -12,7 +12,7 @@ class Tough_Mesh():
     """
     def __init__(self, mname,cname=None,iname=None ):
         self.centers, self.names, self.groups, self.group_key, self.conne \
-            = load_tough_mesh(mname, not cname) # None evaluates False
+            = load_tough_mesh(mname, False if cname else True) # None evaluates False
         if cname:
             self.corners,self.elems = load_tough_corners(cname)
         else:
@@ -69,14 +69,16 @@ def load_tough_mesh(fname, read_conne = False):
     keygen = count()
     group_key = defaultdict( lambda : keygen.next() )
     conne = []
-    
+
+    namelength = 8
     f = open(fname,"r")
     f.next() # Eat the ELEME header
     itr = 0
     for l in f:
-        if not l.strip() or l[0:5]=="CONNE": break # The end of the ELEME block
+        if not l.strip(): continue
+        if l[0:5]=="CONNE": break # The end of the ELEME block
 
-        name = l[0:5]
+        name = l[0:namelength]
         x,y,z = l[50:60],l[60:70],l[70:80]
         if not y.strip():
             X = np.array([ x,z ], dtype=np.double)
@@ -102,7 +104,9 @@ def load_tough_mesh(fname, read_conne = False):
         # Read in connections
         for l in f:
             if not l.strip() or l[0]=="<" or l[0] == ">": break
-            conne.append( np.array( [cell_names[l[0:5]], cell_names[l[5:10]] ] , dtype=np.intc ) )
+            conne.append( np.array( [cell_names[l[0:namelength]],
+                                      cell_names[l[namelength:2*namelength]] ] ,
+                                    dtype=np.intc ) )
 
         conne = np.vstack( conne )
     
