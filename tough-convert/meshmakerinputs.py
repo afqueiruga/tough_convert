@@ -161,10 +161,11 @@ def load_tough_incon(fname):
     name2index = {}
     index2name = []
     itr = 0
+    namelength = 8 # TODO: AD-HOC
     while True:
         l = incon.next()
         if l[0] == "<" or l[0]==":": break
-        name = l[0:5]
+        name = l[0:namelength]
         name2index[name] = itr
         index2name.append( name )
         itr+=1
