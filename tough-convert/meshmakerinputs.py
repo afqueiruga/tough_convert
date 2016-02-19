@@ -81,6 +81,7 @@ def load_tough_mesh(fname, read_conne = False):
         # We need to figure out how long element names are
         if namelength == -1:
             namelength = l.find(" ")
+            if namelength<5: namelength = 5
         
         name = l[0:namelength]
         x,y,z = l[50:60],l[60:70],l[70:80]
@@ -107,7 +108,7 @@ def load_tough_mesh(fname, read_conne = False):
 
         # Read in connections
         for l in f:
-            if not l.strip() or l[0]=="<" or l[0] == ">": break
+            if not l.strip() or l[0]=="<" or l[0] == ">" or l[0] == "+": break
             conne.append( np.array( [cell_names[l[0:namelength]],
                                       cell_names[l[namelength:2*namelength]] ] ,
                                     dtype=np.intc ) )
