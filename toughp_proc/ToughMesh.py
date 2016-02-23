@@ -11,6 +11,9 @@ class Tough_Mesh():
     returning from init.
     """
     def __init__(self, mname,cname=None,iname=None ):
+        """
+        Load a mesh from some files
+        """
         self.centers, self.names, self.groups, self.group_key, self.conne \
             = load_tough_mesh(mname, False if cname else True) # None evaluates False
         if cname:
@@ -29,8 +32,17 @@ class Tough_Mesh():
             if self.conne != None: translate(old2new, self.conne)
             if self.elems != None: self.elems = shuffle(old2new, self.elems)
 
-        
-            
+    def FindElements(self , fltr):
+        """
+        Return a list of elements that satisfy the function fltr( x[name] )
+        Does an O(n) search.
+        """
+        matches = []
+        for n,idx in self.names.iteritems(): # TODO: Bad loop. Loop in center order.
+            if fltr(self.centers[idx]):
+                matches.append(n)
+        return matches
+    
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed
