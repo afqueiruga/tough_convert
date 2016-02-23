@@ -1,6 +1,6 @@
 import argparse
 
-from meshmakerinputs import *
+from ToughMesh import *
 from vtk_writer import *
 from read_tough_data import *
 
