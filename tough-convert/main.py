@@ -58,7 +58,8 @@ def main():
             else:
                 oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
             if arg.corners:
-                vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields={"Groups":cell_groups}) # WRONG
+                step.update({"Groups":TMesh.groups})
+                vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields=step) # WRONG
             else:
                 vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
     
