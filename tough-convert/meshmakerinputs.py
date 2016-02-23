@@ -132,25 +132,33 @@ def load_tough_corners(fname):
     enum = -1
     elem = []
     for l in f:
-        if l[0:3]==">>>": break
+        if l[0:3]==">>>":
+            
+            continue
         sp = l.split()
         verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         if len(sp) > ndim+1:
             cells[enum] = elem
             elem = []
-            enum = int(sp[-1])
+            enum = enum+1 #int(sp[-1])
         elem.append( int(sp[ndim]) )
     cells[enum] = elem # Push the last elem that wasn't triggered
     cells.pop(-1) # Frist loop fringe case
     f.close()
-    
+    # from IPython import embed
+    # embed()
     # Densify dictionaries in np arrays
     npverts = np.empty((len(verts),ndim),dtype=np.double)
+    # First, we need to make a new translation map, because they're read in
+    # in the original TOTAL BLOCK order, before carving
+    vertskey = {}
+    for newk,(i,v) in enumerate(verts.iteritems()):
+        vertskey[i] = newk
     for i,v in verts.iteritems():
-        npverts[i-1,:] = v
+        npverts[vertskey[i],:] = v
     npcells = np.empty((len(cells),len(cells[1])),dtype=np.intc)
     for i,v in cells.iteritems():
-        npcells[i-1,:] = [j-1 for j in v]
+        npcells[i-1,:] = [vertskey[j] for j in v]
     return npverts, npcells
 
     
