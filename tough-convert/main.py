@@ -2,6 +2,7 @@ import argparse
 
 from meshmakerinputs import *
 from vtk_writer import *
+from silo_writer import *
 from read_tough_data import *
 
 def main():
@@ -28,7 +29,19 @@ def main():
 
     
     print "Groups are output according to the following key: ", TMesh.group_key
-    
+
+    # The silo file always writes the meshfile
+    if arg.silo:
+        # String logic to put a mesh postfix
+        if arg.silo[-5:]!=".silo":
+            arg.silo += "_mesh.silo"
+        else:
+            arg.silo = arg.silo[:-5] + "_mesh.silo"
+        if arg.corners:
+            pass
+        else:
+            silo_write_meshfile(arg.silo, TMesh.centers, TMesh.conne)
+            
     # We just want the meshes if there is no data.
     if arg.data == None:
         if arg.vtk:
@@ -40,8 +53,7 @@ def main():
                 vtk_write_mesh(arg.vtk, TMesh.corners, TMesh.elems, cellfields={"Groups": TMesh.groups})
             else:
                 vtk_write_mesh(arg.vtk, TMesh.centers, TMesh.conne,  nodefields={"Groups": TMesh.groups})
-        if arg.silo:
-            pass
+
     # Flac3D is indifferent to wether or not there is data:
     if arg.flac3d:
         pass
@@ -53,16 +65,19 @@ def main():
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data)):
             print "Processing step ",t
-            if arg.vtk[-4:]!=".vtk":
-                oname += "_{0}.vtk".format(t)
-            else:
-                oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
-            if arg.corners:
-                step.update({"Groups":TMesh.groups})
-                vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields=step) # WRONG
-            else:
-                vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
-    
+            if arg.vtk:
+                if arg.vtk[-4:]!=".vtk":
+                    oname += "_{0}.vtk".format(t)
+                else:
+                    oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
+                if arg.corners:
+                    step.update({"Groups":TMesh.groups})
+                    vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields=step) # WRONG
+                else:
+                    vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
+            
+            if arg.silo:
+                pass
     
 if __name__=="__main__":
     main()
