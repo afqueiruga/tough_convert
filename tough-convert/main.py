@@ -39,7 +39,9 @@ def main():
             arg.silo_basename = arg.silo
         arg.silo_meshname = arg.silo_basename + "_mesh.silo"
         if arg.corners:
-            pass
+            silo_write_meshfile(arg.silo_meshname, TMesh.corners, TMesh.elems)
+            silo_write_datafile(arg.silo_basename+"_groups.silo",arg.silo_meshname,
+                                cellfields = {"Groups":TMesh.groups})
         else:
             silo_write_meshfile(arg.silo_meshname, TMesh.centers, TMesh.conne)
             silo_write_datafile(arg.silo_basename+"_groups.silo",arg.silo_meshname,
@@ -82,7 +84,7 @@ def main():
             if arg.silo:
                 oname = arg.silo_basename + "_{0}.silo".format(t)
                 if arg.corners:
-                    pass # TODO
+                    silo_write_datafile(oname,arg.silo_meshname, cellfields=step)
                 else:
                     silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
 if __name__=="__main__":
