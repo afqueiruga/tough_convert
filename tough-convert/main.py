@@ -33,15 +33,18 @@ def main():
     # The silo file always writes the meshfile
     if arg.silo:
         # String logic to put a mesh postfix
-        if arg.silo[-5:]!=".silo":
-            arg.silo += "_mesh.silo"
+        if arg.silo[-5:]==".silo":
+            arg.silo_basename = arg.silo[:-5]
         else:
-            arg.silo = arg.silo[:-5] + "_mesh.silo"
+            arg.silo_basename = arg.silo
+        arg.silo_meshname = arg.silo_basename + "_mesh.silo"
         if arg.corners:
             pass
         else:
-            silo_write_meshfile(arg.silo, TMesh.centers, TMesh.conne)
-            
+            silo_write_meshfile(arg.silo_meshname, TMesh.centers, TMesh.conne)
+            silo_write_datafile(arg.silo_basename+"_groups.silo",arg.silo_meshname,
+                                nodefields = {"Groups":TMesh.groups})
+        
     # We just want the meshes if there is no data.
     if arg.data == None:
         if arg.vtk:
@@ -67,7 +70,7 @@ def main():
             print "Processing step ",t
             if arg.vtk:
                 if arg.vtk[-4:]!=".vtk":
-                    oname += "_{0}.vtk".format(t)
+                    oname = arg.vtk + "_{0}.vtk".format(t)
                 else:
                     oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
                 if arg.corners:
@@ -77,7 +80,10 @@ def main():
                     vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
             
             if arg.silo:
-                pass
-    
+                oname = arg.silo_basename + "_{0}.silo".format(t)
+                if arg.corners:
+                    pass # TODO
+                else:
+                    silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
 if __name__=="__main__":
     main()
