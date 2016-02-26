@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 def load_plot_data_elem(fname):
     """
@@ -18,7 +19,7 @@ def load_plot_data_elem(fname):
     fh.next() # Eat the zone block
     for l in fh:
         if not l.strip() or l[0:4]=="ZONE": break
-        sp = l.split()
+        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l).split()
         for s,d in zip(sp,fields):
             d.append(float(s))
             
