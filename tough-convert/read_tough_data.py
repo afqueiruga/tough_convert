@@ -20,10 +20,18 @@ def load_plot_data_elem(fname):
     for l in fh:
         if not l.strip() or l[0:4]=="ZONE": break
         sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l).split()
-        if len(s
-        for s,d in zip(sp,fields):
-            d.append(float(s))
-            
+        try:
+            if len(sp)==len(keys):
+                for s,d in zip(sp,fields):
+                    d.append(float(s))
+            else:
+                for s,d in zip(sp[-len(keys):],fields):
+                    d.append(float(s))
+        except:
+            print "Had trouble with this line:"
+            print sp
+            raise
+                
     # Compact format
     for i,d in enumerate(fields):
         fields[i] = np.array(d, dtype=np.double)
@@ -46,8 +54,11 @@ def load_plot_data_elem(fname):
         # Refill the preallocated arrays
         for i in xrange(len(fields[0])):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
-            for s,d in zip(sp,fields):
-                d[i] = float(s)
-
+            if len(sp)==len(keys):
+                for s,d in zip(sp,fields):
+                    d[i] = float(s)
+            else:
+                for s,d in zip(sp[-len(keys):],fields):
+                    d[i] = float(s)
         # Yield this set of time step values
         yield { k:d for k,d in zip(keys,fields) }
