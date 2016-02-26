@@ -20,6 +20,7 @@ def load_plot_data_elem(fname):
     for l in fh:
         if not l.strip() or l[0:4]=="ZONE": break
         sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l).split()
+        if len(s
         for s,d in zip(sp,fields):
             d.append(float(s))
             
@@ -44,7 +45,7 @@ def load_plot_data_elem(fname):
 
         # Refill the preallocated arrays
         for i in xrange(len(fields[0])):
-            sp = fh.next().split()
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
             for s,d in zip(sp,fields):
                 d[i] = float(s)
 
