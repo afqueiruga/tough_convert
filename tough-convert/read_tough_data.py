@@ -14,7 +14,7 @@ def load_plot_data_elem(fname):
     # Read the keys
     keys = fh.next().split()[2:]
     fields = [ [] for k in keys ]
-    
+    globalidx = []
     # Read the first timestep block
     fh.next() # Eat the zone block
     for l in fh:
@@ -27,15 +27,20 @@ def load_plot_data_elem(fname):
             else:
                 for s,d in zip(sp[-len(keys):],fields):
                     d.append(float(s))
+                globalidx.append(int(sp[0])-1)
         except:
             print "Had trouble with this line:"
             print sp
             raise
-                
+    from IPython import embed
+    embed()
     # Compact format
+    #globalidx = np.array(globalidx, dtype = np.intc)
     for i,d in enumerate(fields):
         fields[i] = np.array(d, dtype=np.double)
-
+        if len(globalidx)>0):
+            fields[i][globalidx] = fields[i][:]
+    
     # Yield the first time step
     yield { k:d for k,d in zip(keys,fields) }
 
@@ -56,9 +61,16 @@ def load_plot_data_elem(fname):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
-                    d[i] = float(s)
+                    if len(globalidx)>0:
+                        d[globalidx[i]] = float(s)
+                    else:
+                        d[i] = float(s)
             else:
                 for s,d in zip(sp[-len(keys):],fields):
-                    d[i] = float(s)
+                    if len(globalidx)>0:
+                        d[globalidx[i]] = float(s)
+                    else:
+                        d[i] = float(s)
         # Yield this set of time step values
+#        fields[globalidx] = fields[:]
         yield { k:d for k,d in zip(keys,fields) }
