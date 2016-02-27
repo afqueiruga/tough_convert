@@ -32,13 +32,11 @@ def load_plot_data_elem(fname):
             print "Had trouble with this line:"
             print sp
             raise
-    from IPython import embed
-    embed()
     # Compact format
     #globalidx = np.array(globalidx, dtype = np.intc)
     for i,d in enumerate(fields):
         fields[i] = np.array(d, dtype=np.double)
-        if len(globalidx)>0):
+        if len(globalidx)>0:
             fields[i][globalidx] = fields[i][:]
     
     # Yield the first time step
