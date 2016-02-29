@@ -68,7 +68,7 @@ def main():
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
     # The reader for plot data elem is an iterator to handle this.
     if arg.data:
-        for t,step in enumerate(load_plot_data_elem(arg.data)):
+        for t,step in enumerate(load_plot_data_elem(arg.data, TMesh.names)):
             print "Processing step ",t
             if arg.vtk:
                 if arg.vtk[-4:]!=".vtk":

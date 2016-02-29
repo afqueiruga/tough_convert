@@ -1,7 +1,7 @@
 import numpy as np
 import re
 
-def load_plot_data_elem(fname):
+def load_plot_data_elem(fname, nameorder=None):
     """
     Read a Plot_Data_Elem file and spit out the time series value step-by-step.
     returns a generator over the time step values so that it can throw away data.
@@ -15,6 +15,7 @@ def load_plot_data_elem(fname):
     keys = fh.next().split()[2:]
     fields = [ [] for k in keys ]
     globalidx = []
+    globalnames = []
     # Read the first timestep block
     fh.next() # Eat the zone block
     for l in fh:
@@ -27,16 +28,21 @@ def load_plot_data_elem(fname):
             else:
                 for s,d in zip(sp[-len(keys):],fields):
                     d.append(float(s))
-                globalidx.append(int(sp[0])-1)
+                #globalidx.append(int(sp[0])-1)
+                globalnames.append(sp[1])
         except:
             print "Had trouble with this line:"
             print sp
             raise
     # Compact format
-    #globalidx = np.array(globalidx, dtype = np.intc)
+    
+    if globalnames and nameorder:
+        globalidx = np.zeros(len(globalnames), dtype = np.intc)
+        for i,n in enumerate(globalnames):
+            globalidx[i] = nameorder[n]
     for i,d in enumerate(fields):
         fields[i] = np.array(d, dtype=np.double)
-        if len(globalidx)>0:
+        if globalnames and nameorder:
             fields[i][globalidx] = fields[i][:]
     
     # Yield the first time step
@@ -59,13 +65,13 @@ def load_plot_data_elem(fname):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
-                    if len(globalidx)>0:
+                    if globalnames and nameorder:
                         d[globalidx[i]] = float(s)
                     else:
                         d[i] = float(s)
             else:
                 for s,d in zip(sp[-len(keys):],fields):
-                    if len(globalidx)>0:
+                    if globalnames and nameorder:
                         d[globalidx[i]] = float(s)
                     else:
                         d[i] = float(s)
