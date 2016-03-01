@@ -69,7 +69,7 @@ def main():
     # The reader for plot data elem is an iterator to handle this.
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data, TMesh.names)):
-            print "Processing step ",t
+            print "Processed step ",t
             if arg.vtk:
                 if arg.vtk[-4:]!=".vtk":
                     oname = arg.vtk + "_{0}.vtk".format(t)

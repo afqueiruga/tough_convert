@@ -54,3 +54,4 @@ def vtk_write_mesh(fname, X, elems, nodefields=None, cellfields=None):
             PUTFIELD(n,f)
             
     fh.close()
+    print("Wrote file "+fname)

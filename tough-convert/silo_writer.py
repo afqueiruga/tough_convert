@@ -28,7 +28,7 @@ def silo_write_meshfile(fname, X, elems):
                      np.asarray(X.T,order="C"), len(elems),
                      zonelist_name, None)
     silo.close()
-
+    print("Wrote file "+fname)
 
 def silo_write_datafile(fname,mname,cycle=0, time=0, nodefields={}, cellfields={}):
     try:
@@ -61,4 +61,4 @@ def silo_write_datafile(fname,mname,cycle=0, time=0, nodefields={}, cellfields={
         putvar(n,f,DB_ZONECENT)
 
     silo.close()
-    
+    print("Wrote file "+fname)
