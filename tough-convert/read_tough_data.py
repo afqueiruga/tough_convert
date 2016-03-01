@@ -8,7 +8,7 @@ def load_plot_data_elem(fname, nameorder=None):
 
     fname should be Plot_Data_Elem
     """
-
+    print("Reading step 0...")
     fh = open(fname,"r")
 
     # Read the keys
@@ -38,14 +38,18 @@ def load_plot_data_elem(fname, nameorder=None):
     
     if globalnames and nameorder:
         globalidx = np.zeros(len(globalnames), dtype = np.intc)
+        globalidx[:] = -1
         for i,n in enumerate(globalnames):
             globalidx[i] = nameorder[n]
+
     for i,d in enumerate(fields):
         fields[i] = np.array(d, dtype=np.double)
         if globalnames and nameorder:
-            fields[i][globalidx] = fields[i][:]
+            for j in xrange(len(fields[i])):
+                fields[i][globalidx[j]] = d[j]
     
     # Yield the first time step
+    print("done.")
     yield { k:d for k,d in zip(keys,fields) }
 
     # Now we keep going, but using the preallocated ndarrays
@@ -59,7 +63,7 @@ def load_plot_data_elem(fname, nameorder=None):
             except StopIteration:
                 fh.close()
                 raise StopIteration()
-
+        print("Reading step...",)
         # Refill the preallocated arrays
         for i in xrange(len(fields[0])):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
@@ -77,4 +81,5 @@ def load_plot_data_elem(fname, nameorder=None):
                         d[i] = float(s)
         # Yield this set of time step values
 #        fields[globalidx] = fields[:]
+
         yield { k:d for k,d in zip(keys,fields) }
