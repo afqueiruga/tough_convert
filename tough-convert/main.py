@@ -28,7 +28,7 @@ def main():
     TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order )
 
     
-    print "Groups are output according to the following key: ", TMesh.group_key
+    print "Groups are output according to the following key: ", TMesh.group_key.items()
 
     # The silo file always writes the meshfile
     if arg.silo:
