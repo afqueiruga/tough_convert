@@ -29,33 +29,62 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             fh.close()
             raise StopIteration()
 
-
     keys = hunt_for_start_of_block().split()[2:]
 
-    fields = [ [] for k in keys ]
+    fields = [ np.zeros(Nelem,dtype=np.double) for k in keys ]
+    
     globalidx = []
     globalnames = []
 
-    print Nelem
+    # Read the first time step
     i=0
     while True:
         # Check out the line
         l = fh.next()
-        
         # Skip junk inside of the block
-        # if len(sp)-2 != len(keys) or sp[0]=="ELEM.":
         if len(l)<=3 or l[1:6]=='ELEM.':
             continue
-        i += 1
-        name = l[1:6]
-        print '|'+name+'|',
-    
-        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
         # read the pesky element name
-
-        print sp
-        
+        name = l[1:6]
+        # Split the pesky data
+        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
+        # Save data
+        globalnames.append(name)
+        for s,d in zip(sp[1:],fields):
+            d[i]=float(s)
+        # Loop logic
+        i += 1
         if i >= Nelem:
             break
-    raise StopIteration()
+    print globalnames
+    # Shuffle the data
+    if globalnames and nameorder:
+        globalidx = np.zeros(len(globalnames), dtype = np.intc)
+        globalidx[:] = -1
+        for i,n in enumerate(globalnames):
+            globalidx[i] = nameorder[n]
+    for i,d in enumerate(fields):
+        fields[i] = np.array(d, dtype=np.double)
+        if globalnames and nameorder:
+            for j in xrange(len(fields[i])):
+                fields[i][globalidx[j]] = d[j]
+    yield {k:d for k,d in zip(keys,fields)}
+    # return
+    while True:
+        hunt_for_start_of_block()
+        i=0
+        while True:
+            l = fh.next()
+            if len(l)<=3 or l[1:6]=='ELEM.':
+                continue
+            name = l[1:6]
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
+            for s,d in zip(sp[1:],fields):
+                d[globalidx[i]] = float(s)
+            i += 1
+            if i >= Nelem:
+                break
+        yield {k:d for k,d in zip(keys,fields)}
+
+    # raise StopIteration()
         
