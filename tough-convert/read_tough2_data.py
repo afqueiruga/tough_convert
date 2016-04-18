@@ -35,14 +35,27 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
     fields = [ [] for k in keys ]
     globalidx = []
     globalnames = []
-    
-    for i in xrange(Nelem):
+
+    print Nelem
+    i=0
+    while True:
+        # Check out the line
         l = fh.next()
-        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l).split()
-        if len(sp) != len(keys):
+        
+        # Skip junk inside of the block
+        # if len(sp)-2 != len(keys) or sp[0]=="ELEM.":
+        if len(l)<=3 or l[1:6]=='ELEM.':
             continue
+        i += 1
+        name = l[1:6]
+        print '|'+name+'|',
+    
+        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
+        # read the pesky element name
+
         print sp
-
-
+        
+        if i >= Nelem:
+            break
     raise StopIteration()
         
