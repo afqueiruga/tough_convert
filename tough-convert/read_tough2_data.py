@@ -71,10 +71,12 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
     yield {k:d for k,d in zip(keys,fields)}
     # return
     while True:
-        hunt_for_start_of_block()
+        print hunt_for_start_of_block(),
         i=0
         while True:
             l = fh.next()
+            if i<2:
+                print l,
             if len(l)<=3 or l[1:6]=='ELEM.':
                 continue
             name = l[1:6]
