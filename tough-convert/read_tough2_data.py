@@ -11,14 +11,6 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
     """
     print("Reading step 0...")
     fh = open(fname,"r")
-
-    # Read the keys
-    #keys = fh.next().split()[2:]
-    #fields = [ [] for k in keys ]
-    #globalidx = []
-    #globalnames = []
-
-    
     def hunt_for_start_of_block():
         try:
             while True:
@@ -28,48 +20,61 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
         except StopIteration:
             fh.close()
             raise StopIteration()
-
-    keys = hunt_for_start_of_block().split()[2:]
-
-    fields = [ np.zeros(Nelem,dtype=np.double) for k in keys ]
+    def read_elem_block(firsttime=False):
+        keys = hunt_for_start_of_block().split()[2:]
+        print keys
+        fields = [ np.zeros(Nelem,dtype=np.double) for k in keys ]
+        i=0
+        while True:
+            # Check out the line
+            l = fh.next()
+            # Skip junk inside of the block
+            if len(l)<=3 or l[1:6]=='ELEM.':
+                continue
+            # read the pesky element name
+            name = l[1:6]
+            # Split the pesky data
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
+            # Save data
+            if firsttime:
+                read_elem_block.globalnames.append(name)
+                for s,d in zip(sp[1:],fields):
+                    d[i]=float(s)
+            else:
+                for s,d in zip(sp[1:],fields):
+                    d[read_elem_block.globalidx[i]] = float(s)
+            # Loop logic
+            i += 1
+            if i >= Nelem:
+                break
+        if firsttime:
+            # Shuffle the data
+            if read_elem_block.globalnames and nameorder:
+                read_elem_block.globalidx = np.zeros(len(read_elem_block.globalnames), dtype = np.intc)
+                read_elem_block.globalidx[:] = -1
+                for i,n in enumerate(read_elem_block.globalnames):
+                    read_elem_block.globalidx[i] = nameorder[n]
+            for i,d in enumerate(fields):
+                fields[i] = np.array(d, dtype=np.double)
+                if read_elem_block.globalnames and nameorder:
+                    for j in xrange(len(fields[i])):
+                        fields[i][read_elem_block.globalidx[j]] = d[j]
+        return {k:d for k,d in zip(keys,fields)}
     
-    globalidx = []
-    globalnames = []
+    read_elem_block.globalidx = []
+    read_elem_block.globalnames = []
 
-    # Read the first time step
-    i=0
+
+    block1 = read_elem_block(firsttime=True)
+    block2 = read_elem_block(firsttime=False)
+    block1.update(block2)
+    yield block1
     while True:
-        # Check out the line
-        l = fh.next()
-        # Skip junk inside of the block
-        if len(l)<=3 or l[1:6]=='ELEM.':
-            continue
-        # read the pesky element name
-        name = l[1:6]
-        # Split the pesky data
-        sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
-        # Save data
-        globalnames.append(name)
-        for s,d in zip(sp[1:],fields):
-            d[i]=float(s)
-        # Loop logic
-        i += 1
-        if i >= Nelem:
-            break
-    print globalnames
-    # Shuffle the data
-    if globalnames and nameorder:
-        globalidx = np.zeros(len(globalnames), dtype = np.intc)
-        globalidx[:] = -1
-        for i,n in enumerate(globalnames):
-            globalidx[i] = nameorder[n]
-    for i,d in enumerate(fields):
-        fields[i] = np.array(d, dtype=np.double)
-        if globalnames and nameorder:
-            for j in xrange(len(fields[i])):
-                fields[i][globalidx[j]] = d[j]
-    yield {k:d for k,d in zip(keys,fields)}
-    # return
+        block1 = read_elem_block()
+        block2 = read_elem_block()
+        block1.update(block2)
+        yield block1
+    return
     while True:
         print hunt_for_start_of_block(),
         i=0
@@ -81,8 +86,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
                 continue
             name = l[1:6]
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
-            for s,d in zip(sp[1:],fields):
-                d[globalidx[i]] = float(s)
+            
             i += 1
             if i >= Nelem:
                 break
