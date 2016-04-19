@@ -34,15 +34,21 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             # read the pesky element name
             name = l[1:6]
             # Split the pesky data
-            sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
+            #sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()[1:]
+            sp = range(len(keys))
+            for j in xrange(len(keys)):
+                try:
+                    sp[j] = float(l[ (12+j*12) : (24+j*12) ])
+                except ValueError:
+                    sp[j] = 0.0
             # Save data
             if firsttime:
                 read_elem_block.globalnames.append(name)
-                for s,d in zip(sp[1:],fields):
-                    d[i]=float(s)
+                for s,d in zip(sp,fields):
+                    d[i]=s #float(s)
             else:
-                for s,d in zip(sp[1:],fields):
-                    d[read_elem_block.globalidx[i]] = float(s)
+                for s,d in zip(sp,fields):
+                    d[read_elem_block.globalidx[i]] = s #float(s)
             # Loop logic
             i += 1
             if i >= Nelem:
@@ -60,37 +66,20 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
                     for j in xrange(len(fields[i])):
                         fields[i][read_elem_block.globalidx[j]] = d[j]
         return {k:d for k,d in zip(keys,fields)}
-    
+
+    # Persistent data in the namespace of the subroutine
     read_elem_block.globalidx = []
     read_elem_block.globalnames = []
-
 
     block1 = read_elem_block(firsttime=True)
     block2 = read_elem_block(firsttime=False)
     block1.update(block2)
     yield block1
+    
     while True:
         block1 = read_elem_block()
         block2 = read_elem_block()
         block1.update(block2)
         yield block1
-    return
-    while True:
-        print hunt_for_start_of_block(),
-        i=0
-        while True:
-            l = fh.next()
-            if i<2:
-                print l,
-            if len(l)<=3 or l[1:6]=='ELEM.':
-                continue
-            name = l[1:6]
-            sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()
-            
-            i += 1
-            if i >= Nelem:
-                break
-        yield {k:d for k,d in zip(keys,fields)}
-
-    # raise StopIteration()
         
+
