@@ -4,6 +4,7 @@ from meshmakerinputs import *
 from vtk_writer import *
 from silo_writer import *
 from read_tough_data import *
+from read_tough2_data import *
 
 def main():
     parser = argparse.ArgumentParser(description='Convert TOUGH meshes and data output to common formats')
@@ -11,6 +12,7 @@ def main():
     parser.add_argument("--corners",type=str)
     parser.add_argument("--order",type=str)
     parser.add_argument("--data",type=str)
+    parser.add_argument("--tough2data",type=str)
     parser.add_argument("--vtk", type=str)
     parser.add_argument("--silo", type=str)
     parser.add_argument("--flac3d", type=str)
@@ -67,25 +69,34 @@ def main():
     # Take a time step loop for the data
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
     # The reader for plot data elem is an iterator to handle this.
+    def write_step(t,step):
+        if arg.vtk:
+            if arg.vtk[-4:]!=".vtk":
+                oname = arg.vtk + "_{0}.vtk".format(t)
+            else:
+                oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
+            if arg.corners:
+                step.update({"Groups":TMesh.groups})
+                vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields=step) # WRONG
+            else:
+                vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
+            
+        if arg.silo:
+            oname = arg.silo_basename + "_{0}.silo".format(t)
+            if arg.corners:
+                silo_write_datafile(oname,arg.silo_meshname, cellfields=step)
+            else:
+                silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data, TMesh.names)):
             print "Processed step ",t
-            if arg.vtk:
-                if arg.vtk[-4:]!=".vtk":
-                    oname = arg.vtk + "_{0}.vtk".format(t)
-                else:
-                    oname = arg.vtk[:-4] +  "_{0}.vtk".format(t)
-                if arg.corners:
-                    step.update({"Groups":TMesh.groups})
-                    vtk_write_mesh(oname, TMesh.corners,TMesh.elems, cellfields=step) # WRONG
-                else:
-                    vtk_write_mesh(oname, TMesh.centers, TMesh.conne,  nodefields=step)
-            
-            if arg.silo:
-                oname = arg.silo_basename + "_{0}.silo".format(t)
-                if arg.corners:
-                    silo_write_datafile(oname,arg.silo_meshname, cellfields=step)
-                else:
-                    silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
+            write_step(t,step)
+    if arg.tough2data:
+        for t,step in enumerate(load_tough2_output(arg.tough2data,
+                                                   len(TMesh.centers),len(TMesh.conne),
+                                                   TMesh.names)):
+            print "Processed step ",t
+            write_step(t,step)
+    
 if __name__=="__main__":
     main()
