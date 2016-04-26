@@ -14,9 +14,11 @@ class Tough_Mesh():
         self.centers, self.names, self.groups, self.group_key, self.conne \
             = load_tough_mesh(mname, False if cname else True) # None evaluates False
         if cname:
-            self.corners,self.elems = load_tough_corners(cname)
+            self.corners,self.elems, self.corner_names = load_tough_corners(cname)
+            self.corner_names = { n:i for i,n in enumerate(self.corner_names) }
+            
         else:
-            self.corners,self.elems = None,None
+            self.corners,self.elems, self.corner_names = None,None, None
             
         if iname:
             name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
@@ -27,8 +29,22 @@ class Tough_Mesh():
             self.names = name2index
             self.groups = shuffle(old2new, self.groups)
             if self.conne != None: translate(old2new, self.conne)
-            if self.elems != None: self.elems = shuffle(old2new, self.elems)
+            if self.elems != None:
+                if self.corner_names == None:
+                    self.elems = shuffle(old2new, self.elems)
+                else:
+                    corners2new = make_shuffler( index2name, self.corner_names)
+                    self.elems = shuffle(corners2new, self.elems)
+        else:
+            # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
+            #name2index = { n:i for i,n in enumerate(self.names) }
 
+            if self.elems != None and self.corner_names != None:
+                index2name = range(len(self.names))
+                for k,i in self.names.iteritems():
+                    index2name[i] = k
+                corners2orig = make_shuffler( index2name, self.corner_names )
+                self.elems = shuffle( corners2orig, self.elems)
         
             
 def make_shuffler(new2name, name2old):
@@ -127,26 +143,26 @@ def load_tough_corners(fname):
     """
     ndim = 3
     verts = {}
-    cells = {}
+    cells = []
+    elemnames = []
     f = open(fname,"r")
     enum = -1
     elem = []
     for l in f:
         if l[0:3]==">>>":
-            
             continue
         sp = l.split()
-        verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         if len(sp) > ndim+1:
-            cells[enum] = elem
+            cells.append( elem )
             elem = []
             enum = enum+1 #int(sp[-1])
+            elemnames.append(sp[-1])
+        verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         elem.append( int(sp[ndim]) )
-    cells[enum] = elem # Push the last elem that wasn't triggered
-    cells.pop(-1) # Frist loop fringe case
+    cells.append( elem )# Push the last elem that wasn't triggered
+    cells.pop(0) # Frist loop fringe case
     f.close()
-    # from IPython import embed
-    # embed()
+    
     # Densify dictionaries in np arrays
     npverts = np.empty((len(verts),ndim),dtype=np.double)
     # First, we need to make a new translation map, because they're read in
@@ -157,9 +173,9 @@ def load_tough_corners(fname):
     for i,v in verts.iteritems():
         npverts[vertskey[i],:] = v
     npcells = np.empty((len(cells),len(cells[1])),dtype=np.intc)
-    for i,v in cells.iteritems():
-        npcells[i-1,:] = [vertskey[j] for j in v]
-    return npverts, npcells
+    for i,v in enumerate(cells):
+        npcells[i,:] = [vertskey[j] for j in v]
+    return npverts, npcells, elemnames
 
     
 def load_tough_incon(fname, namelength=-1):
