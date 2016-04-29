@@ -3,6 +3,8 @@ import numpy as np
 from itertools import count
 from collections import defaultdict
 
+from util import *
+
 class Tough_Mesh():
     """
     A container class for all the mesh objects. 
@@ -14,9 +16,13 @@ class Tough_Mesh():
         self.centers, self.names, self.groups, self.group_key, self.conne \
             = load_tough_mesh(mname, False if cname else True) # None evaluates False
         if cname:
-            self.corners,self.elems, self.corner_names = load_tough_corners(cname)
-            self.corner_names = { n:i for i,n in enumerate(self.corner_names) }
-            
+            self.corners,self.elems, self.corner_index2names = load_tough_corners(cname)
+            self.corner_names = { n:i for i,n in enumerate(self.corner_index2names) }
+            # We need to filter out cells that aren't in the mesh to deal with holes that we've dug ourselves into:
+            self.elems,self.corner_names = filter_by_names(self.names, self.corner_names,self.elems)
+            self.centers,newnames = filter_by_names(self.corner_names, self.names,self.centers)
+            self.groups, newnames = filter_by_names(self.corner_names, self.names,self.groups)
+            self.names = newnames
         else:
             self.corners,self.elems, self.corner_names = None,None, None
             
@@ -45,8 +51,7 @@ class Tough_Mesh():
                     index2name[i] = k
                 corners2orig = make_shuffler( index2name, self.corner_names )
                 self.elems = shuffle( corners2orig, self.elems)
-        
-            
+
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed

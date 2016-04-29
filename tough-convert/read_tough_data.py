@@ -1,6 +1,8 @@
 import numpy as np
 import re
 
+from util import *
+
 def load_plot_data_elem(fname, nameorder=None):
     """
     Read a Plot_Data_Elem file and spit out the time series value step-by-step.
@@ -34,16 +36,20 @@ def load_plot_data_elem(fname, nameorder=None):
             print "Had trouble with this line:"
             print sp
             raise
+        
     # Compact format
-    
     if globalnames and nameorder:
         globalidx = np.zeros(len(globalnames), dtype = np.intc)
         globalidx[:] = -1
-        for i,n in enumerate(globalnames):
-            globalidx[i] = nameorder[n]
-
+        i=0
+        for n in globalnames:
+            try:
+                globalidx[i] = nameorder[n]
+                i+=1
+            except KeyError:
+                pass
     for i,d in enumerate(fields):
-        fields[i] = np.array(d, dtype=np.double)
+        fields[i] = np.empty(len(nameorder), dtype=np.double)
         if globalnames and nameorder:
             for j in xrange(len(fields[i])):
                 fields[i][globalidx[j]] = d[j]
