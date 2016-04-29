@@ -12,6 +12,7 @@ def main():
     parser.add_argument("--corners",type=str)
     parser.add_argument("--order",type=str)
     parser.add_argument("--data",type=str)
+    parser.add_argument("--del_groups",type=str,nargs='+')
     parser.add_argument("--tough2data",type=str)
     parser.add_argument("--vtk", type=str)
     parser.add_argument("--silo", type=str)
@@ -27,7 +28,7 @@ def main():
     #if arg.order:
     #    order = load_tough_incon(arg.order)
         # Shuffle the mesh correspondingly
-    TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order )
+    TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order, arg.del_groups )
 
     
     print "Groups are output according to the following key: ", TMesh.group_key.items()

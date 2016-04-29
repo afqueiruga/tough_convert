@@ -12,13 +12,32 @@ class Tough_Mesh():
     Calls the routines below upon init to fill in its members. Will shuffle itself--overwriting mesh order--before
     returning from init.
     """
-    def __init__(self, mname,cname=None,iname=None ):
-        self.centers, self.names, self.groups, self.group_key, self.conne \
+    def __init__(self, mname,cname=None,iname=None,del_groups=None ):
+        self.centers, self.names,orig_index2name, self.groups, self.group_key, self.conne \
             = load_tough_mesh(mname, False if cname else True) # None evaluates False
+        # TODO: The new filtering features breaks connections. Need to filter those too
+        if del_groups:
+            newcenters = []
+            newnames = {}
+            newgroups = []
+            i = 0
+            for c,n,g in zip(self.centers,orig_index2name,self.groups):
+                for grp in del_groups:
+                    if self.group_key[grp] == g:
+                        continue
+                newcenters.append(c)
+                newnames[n] = i
+                newgroups.append(g)
+                i+=1
+            self.centers = np.vstack(newcenters)
+            self.names = newnames
+            self.groups = newgroups
+            
         if cname:
             self.corners,self.elems, self.corner_index2names = load_tough_corners(cname)
             self.corner_names = { n:i for i,n in enumerate(self.corner_index2names) }
-            # We need to filter out cells that aren't in the mesh to deal with holes that we've dug ourselves into:
+            # We need to filter out cells that aren't in the mesh to deal with
+            # holes that we've dug ourselves into:
             self.elems,self.corner_names = filter_by_names(self.names, self.corner_names,self.elems)
             self.centers,newnames = filter_by_names(self.corner_names, self.names,self.centers)
             self.groups, newnames = filter_by_names(self.corner_names, self.names,self.groups)
@@ -86,6 +105,7 @@ def load_tough_mesh(fname, read_conne = False):
 
     cell_centers = []
     cell_names = {}
+    cell_index2names = []
     cell_groups = []
     keygen = count()
     group_key = defaultdict( lambda : keygen.next() )
@@ -113,7 +133,8 @@ def load_tough_mesh(fname, read_conne = False):
         group = l[15:20]
         cell_centers.append(X)
         
-        cell_names[name] = itr 
+        cell_names[name] = itr
+        cell_index2names.append(name)
         cell_groups.append(group_key[group])
         itr += 1
     cell_centers = np.vstack( cell_centers )
@@ -137,7 +158,7 @@ def load_tough_mesh(fname, read_conne = False):
         conne = np.vstack( conne )
     
     f.close()
-    return cell_centers, cell_names, cell_groups, group_key, conne
+    return cell_centers, cell_names, cell_index2names, cell_groups, group_key, conne
 
 
 def load_tough_corners(fname):
