@@ -3,20 +3,28 @@ import argparse
 from meshmakerinputs import *
 from vtk_writer import *
 from silo_writer import *
+from gmsh_writer import *
+from flac3d_writer import *
 from read_tough_data import *
 from read_tough2_data import *
 
 def main():
     parser = argparse.ArgumentParser(description='Convert TOUGH meshes and data output to common formats')
+    # Input fields
     parser.add_argument("MESH")
     parser.add_argument("--corners",type=str)
     parser.add_argument("--order",type=str)
     parser.add_argument("--data",type=str)
-    parser.add_argument("--del_groups",type=str,nargs='+')
     parser.add_argument("--tough2data",type=str)
+    # Manipulation options
+    parser.add_argument("--del_groups",type=str,nargs='+')
+    # Data output options
     parser.add_argument("--vtk", type=str)
     parser.add_argument("--silo", type=str)
+    # _BAD_ Mesh conversion options -- only for ad hoc 2D manipulations!
     parser.add_argument("--flac3d", type=str)
+    parser.add_argument("--gmsh", type=str)
+    
     arg = parser.parse_args()
     
     # Read in Mesh components. Reading CONNE is not needed if CORNERS is supplied.
@@ -64,8 +72,12 @@ def main():
 
     # Flac3D is indifferent to wether or not there is data:
     if arg.flac3d:
-        pass
-
+        TMesh.Generate_Pseudo_Corners(0,0,0,0)
+        flac3d_write_mesh(arg.flac3d, TMesh.corners,TMesh.elems)
+    # So is gmsh output
+    if arg.gmsh:
+        TMesh.Generate_Pseudo_Corners(0,0,0,0)
+        gmsh_write_mesh(arg.gmsh, TMesh.corners,TMesh.elems)
     
     # Take a time step loop for the data
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
