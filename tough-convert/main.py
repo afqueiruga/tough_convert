@@ -3,6 +3,7 @@ import argparse
 from meshmakerinputs import *
 from vtk_writer import *
 from silo_writer import *
+from gmsh_writer import *
 from read_tough_data import *
 from read_tough2_data import *
 
@@ -71,11 +72,11 @@ def main():
     # Flac3D is indifferent to wether or not there is data:
     if arg.flac3d:
         TMesh.Generate_Pseudo_Corners(0,0,0,0)
-
+        
     # So is gmsh output
     if arg.gmsh:
         TMesh.Generate_Pseudo_Corners(0,0,0,0)
-        
+        gmsh_write_mesh(arg.gmsh, TMesh.corners,TMesh.elems)
     
     # Take a time step loop for the data
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory

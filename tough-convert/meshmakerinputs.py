@@ -85,12 +85,16 @@ class Tough_Mesh():
                     index2name[i] = k
                 corners2orig = make_shuffler( index2name, self.corner_names )
                 self.elems = shuffle( corners2orig, self.elems)
+
                 
     def Generate_Pseudo_Corners(self,xmin,xmax,ymin,ymax):
         " For 2D, make a simple 2D mesh for FEM/Flac "
+        # First, do we actually need to make them?
+        if self.corners:
+            return
+        # Loop over the element centers and make a grid
         xs = set()
         ys = set()
-        # Loop over the element centers and make a grid
         for l in self.centers:
             xs.add(l[0])
             ys.add(l[2])
@@ -117,15 +121,14 @@ class Tough_Mesh():
 
         # Generate the elements
         self.elems = np.empty( ((len(xl)-1)*(len(yl)-1), 4 ), dtype=np.intc )
-        idx = lambda i,j : j*(len(yl)-1)+i
+        idx = lambda i,j : j*(len(xl))+i
         for j in xrange(len(yl)-1):
             for i in xrange(len(xl)-1):
                 self.elems[j*(len(xl)-1) + i,:] = \
                   ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
-                  
-        print self.corners
-        print self.elems
-        
+
+
+                
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed
