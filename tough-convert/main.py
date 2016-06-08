@@ -4,6 +4,7 @@ from meshmakerinputs import *
 from vtk_writer import *
 from silo_writer import *
 from gmsh_writer import *
+from flac3d_writer import *
 from read_tough_data import *
 from read_tough2_data import *
 
@@ -72,7 +73,7 @@ def main():
     # Flac3D is indifferent to wether or not there is data:
     if arg.flac3d:
         TMesh.Generate_Pseudo_Corners(0,0,0,0)
-        
+        flac3d_write_mesh(arg.flac3d, TMesh.corners,TMesh.elems):
     # So is gmsh output
     if arg.gmsh:
         TMesh.Generate_Pseudo_Corners(0,0,0,0)
