@@ -69,7 +69,7 @@ def load_plot_data_elem(fname, nameorder=None):
             except StopIteration:
                 fh.close()
                 raise StopIteration()
-        print("Reading step...",)
+        print("Reading step...")
         # Refill the preallocated arrays
         for i in xrange(len(fields[0])):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()

@@ -31,7 +31,7 @@ class Tough_Mesh():
                 i+=1
             self.centers = np.vstack(newcenters)
             self.names = newnames
-            self.groups = newgroups
+            self.groups = np.array(newgroups,dtype=np.intc)
             
         if cname:
             self.corners,self.elems, self.corner_index2names = load_tough_corners(cname)
@@ -48,6 +48,21 @@ class Tough_Mesh():
         if iname:
             name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
 
+            # WRONG STILL THE LOOP WON'T PRESERVE ORDER
+            #index2name,name2index=filter_by_names(self.names, name2index,index2name, vstack=False)
+            # This one will
+            itr=0
+            newindex2name = range(len(self.names))
+            newname2index = {}
+            for n in index2name:
+                if self.names.has_key(n):
+                    newindex2name[itr]=n
+                    newname2index[n] = itr
+                    itr+=1
+                
+            index2name = newindex2name
+            name2index = newname2index
+            
             old2new = make_shuffler( index2name, self.names )
             self.centers = shuffle(old2new, self.centers)
             #self.names = shuffle(old2new, self.names)
