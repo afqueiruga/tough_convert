@@ -64,7 +64,7 @@ def main():
 
     # Flac3D is indifferent to wether or not there is data:
     if arg.flac3d:
-        pass
+        TMesh.Generate_Pseudo_Corners(0,0,0,0)
 
     
     # Take a time step loop for the data
