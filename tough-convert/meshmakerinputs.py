@@ -110,12 +110,21 @@ class Tough_Mesh():
         yl = corners(yc[range(yc.size-1,-1,-1)], start=0.0)#[range(yc.size,-1,-1)]
 
         # Make the 2D grid of centers
-        self.corners = np.empty( (len(xl)*len(yl), 2) )
+        self.corners = np.empty( (len(xl)*len(yl), 2), dtype=np.double )
         for i,y in enumerate(yl):
             self.corners[i*len(xl):(i+1)*len(xl),0] = xl[:]
             self.corners[i*len(xl):(i+1)*len(xl),1] = y
-            
+
+        # Generate the elements
+        self.elems = np.empty( ((len(xl)-1)*(len(yl)-1), 4 ), dtype=np.intc )
+        idx = lambda i,j : j*(len(yl)-1)+i
+        for j in xrange(len(yl)-1):
+            for i in xrange(len(xl)-1):
+                self.elems[j*(len(xl)-1) + i,:] = \
+                  ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
+                  
         print self.corners
+        print self.elems
         
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
