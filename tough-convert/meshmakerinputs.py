@@ -110,8 +110,8 @@ class Tough_Mesh():
             for i in xrange(1,a.size+1):
                 o[i] = 2.0*(a[i-1]-o[i-1])+o[i-1]
             return o
-        xl = corners(xc, start=2.0e-4)
-        yl = corners(yc[range(yc.size-1,-1,-1)], start=0.0)#[range(yc.size,-1,-1)]
+        xl = corners(xc, start=xmin)
+        yl = corners(yc[range(yc.size-1,-1,-1)], start=ymin)#[range(yc.size,-1,-1)]
 
         # Make the 2D grid of centers
         self.corners = np.empty( (len(xl)*len(yl), 2), dtype=np.double )
