@@ -42,18 +42,23 @@ def load_plot_data_elem(fname, nameorder=None):
         globalidx = np.zeros(len(globalnames), dtype = np.intc)
         globalidx[:] = -1
         i=0
+        # for i,n in enumerate(globalnames):
+            # globalidx[i] = nameorder[n]
         for n in globalnames:
             try:
                 globalidx[i] = nameorder[n]
                 i+=1
             except KeyError:
                 pass
-    for i,d in enumerate(fields):
-        fields[i] = np.empty(len(nameorder), dtype=np.double)
-        if globalnames and nameorder:
+    if globalnames and nameorder:
+        for i,d in enumerate(fields):
+            fields[i] = np.empty(len(nameorder), dtype=np.double)
             for j in xrange(len(fields[i])):
                 fields[i][globalidx[j]] = d[j]
-    
+    else:
+        for i,d in enumerate(fields):
+            fields[i] = np.array(d, dtype=np.double)
+
     # Yield the first time step
     print("done.")
     yield { k:d for k,d in zip(keys,fields) }
