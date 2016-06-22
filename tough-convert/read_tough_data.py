@@ -28,10 +28,15 @@ def load_plot_data_elem(fname, nameorder=None):
                 for s,d in zip(sp,fields):
                     d.append(float(s))
             else:
-                for s,d in zip(sp[-len(keys):],fields):
-                    d.append(float(s))
-                #globalidx.append(int(sp[0])-1)
-                globalnames.append(sp[1])
+                # THEORY: I don't need to shuffle now, I just need to skip sp[1] not in nameorder
+                # Because I already shuffled in TMesh.__init__
+                # Ah, but nope it's a divfferent order in the parallel Plot_Data_Elem
+                n = sp[1]
+                if n in nameorder:
+                    for s,d in zip(sp[-len(keys):],fields):
+                        d.append(float(s))
+                    #globalidx.append(int(sp[0])-1)
+                    globalnames.append(sp[1])
         except:
             print "Had trouble with this line:"
             print sp
@@ -53,8 +58,9 @@ def load_plot_data_elem(fname, nameorder=None):
     if globalnames and nameorder:
         for i,d in enumerate(fields):
             fields[i] = np.empty(len(nameorder), dtype=np.double)
-            for j in xrange(len(fields[i])):
-                fields[i][globalidx[j]] = d[j]
+            acopy = np.array(d)
+            for j in xrange(len(acopy)):
+                fields[i][globalidx[j]] = acopy[j]
     else:
         for i,d in enumerate(fields):
             fields[i] = np.array(d, dtype=np.double)

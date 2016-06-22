@@ -68,13 +68,16 @@ class Tough_Mesh():
             #self.names = shuffle(old2new, self.names)
             self.names = name2index
             self.groups = shuffle(old2new, self.groups)
-            if self.conne != None: translate(old2new, self.conne)
+            if self.conne != None:
+                translate(old2new, self.conne)
             if self.elems != None:
                 if self.corner_names == None:
                     self.elems = shuffle(old2new, self.elems)
                 else:
                     corners2new = make_shuffler( index2name, self.corner_names)
                     self.elems = shuffle(corners2new, self.elems)
+            # AT THIS POINT, self.elems is in the same order as self.centers, following self.names
+
         else:
             # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
             #name2index = { n:i for i,n in enumerate(self.names) }
