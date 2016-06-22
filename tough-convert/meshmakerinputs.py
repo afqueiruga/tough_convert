@@ -282,7 +282,7 @@ def load_tough_incon(fname, namelength=-1):
         l = incon.next()
         if namelength == -1:
             namelength = l.find(" ")
-        if l[0] == "<" or l[0]==":": break
+        if l[0] == "<" or l[0]==":" or l[0]=='+': break
         name = l[0:namelength]
         name2index[name] = itr
         index2name.append( name )
