@@ -85,8 +85,6 @@ def load_plot_data_elem(fname, nameorder=None):
         i=0
         while i<len(fields[0]):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
-            if nameorder and not sp[1] in nameorder:
-                continue
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
                     if globalnames and nameorder:
@@ -94,6 +92,8 @@ def load_plot_data_elem(fname, nameorder=None):
                     else:
                         d[i] = float(s)
             else:
+                if nameorder and not sp[1] in nameorder:
+                    continue
                 for s,d in zip(sp[-len(keys):],fields):
                     if globalnames and nameorder:
                         d[globalidx[i]] = float(s)
