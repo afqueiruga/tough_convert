@@ -82,8 +82,11 @@ def load_plot_data_elem(fname, nameorder=None):
                 raise StopIteration()
         print("Reading step...")
         # Refill the preallocated arrays
-        for i in xrange(len(fields[0])):
+        i=0
+        while i<len(fields[0]):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
+            if nameorder and not sp[1] in nameorder:
+                continue
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
                     if globalnames and nameorder:
@@ -96,6 +99,7 @@ def load_plot_data_elem(fname, nameorder=None):
                         d[globalidx[i]] = float(s)
                     else:
                         d[i] = float(s)
+            i+=1
         # Yield this set of time step values
 #        fields[globalidx] = fields[:]
 
