@@ -67,7 +67,7 @@ class Tough_Mesh():
             self.centers = shuffle(old2new, self.centers)
             #self.names = shuffle(old2new, self.names)
             self.names = name2index
-            self.groups = shuffle(old2new, self.groups)
+            self.groups = shuffle(old2new, self.groups).flatten()
             if self.conne != None:
                 translate(old2new, self.conne)
             if self.elems != None:
