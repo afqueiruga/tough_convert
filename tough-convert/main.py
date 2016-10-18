@@ -78,6 +78,7 @@ def main():
     if arg.gmsh:
         TMesh.Generate_Pseudo_Corners(0,0,0,0)
         gmsh_write_mesh(arg.gmsh, TMesh.corners,TMesh.elems)
+        arg.corners = True
     
     # Take a time step loop for the data
     # We read in data and write it out one timestep at a time to minimize how much needs to be held in memory
