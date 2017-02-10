@@ -21,10 +21,13 @@ class Tough_Mesh():
             newnames = {}
             newgroups = []
             i = 0
+            del_keys = [ self.group_key[g] for g in del_groups ]
             for c,n,g in zip(self.centers,orig_index2name,self.groups):
-                for grp in del_groups:
-                    if self.group_key[grp] == g:
-                        continue
+                #for grp in del_groups:
+                #    if self.group_key[grp] == g:
+                #        continue
+                if g in del_keys:
+                    continue
                 newcenters.append(c)
                 newnames[n] = i
                 newgroups.append(g)
