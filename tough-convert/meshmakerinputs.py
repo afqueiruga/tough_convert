@@ -71,6 +71,7 @@ class Tough_Mesh():
             #self.names = shuffle(old2new, self.names)
             self.names = name2index
             self.groups = shuffle(old2new, self.groups).flatten()
+            
             if self.conne != None:
                 translate(old2new, self.conne)
             if self.elems != None:
@@ -80,7 +81,7 @@ class Tough_Mesh():
                     corners2new = make_shuffler( index2name, self.corner_names)
                     self.elems = shuffle(corners2new, self.elems)
             # AT THIS POINT, self.elems is in the same order as self.centers, following self.names
-
+            
         else:
             # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
             #name2index = { n:i for i,n in enumerate(self.names) }
@@ -101,9 +102,15 @@ class Tough_Mesh():
         # Loop over the element centers and make a grid
         xs = set()
         ys = set()
-        for l in self.centers:
-            xs.add(l[0])
-            ys.add(l[2])
+        if self.centers.shape[1] == 3:
+            for l in self.centers:
+                xs.add(l[0])
+                ys.add(l[2])
+        else:
+            for l in self.centers:
+                xs.add(l[0])
+                ys.add(l[1])
+                
         xc = np.array(list(xs))
         yc = np.array(list(ys))
         xc.sort()

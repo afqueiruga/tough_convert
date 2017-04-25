@@ -30,7 +30,7 @@ def load_plot_data_elem(fname, nameorder=None):
             else:
                 # THEORY: I don't need to shuffle now, I just need to skip sp[1] not in nameorder
                 # Because I already shuffled in TMesh.__init__
-                # Ah, but nope it's a divfferent order in the parallel Plot_Data_Elem
+                # Ah, but nope it's a different order in the parallel Plot_Data_Elem
                 n = sp[1]
                 if n in nameorder:
                     for s,d in zip(sp[-len(keys):],fields):
