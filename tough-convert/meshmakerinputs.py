@@ -120,7 +120,7 @@ class Tough_Mesh():
             o = np.zeros((a.size+1,))
             o[0]=start
             # o[0] = a[0]-0.5*(a[1]-a[0])
-            for i in xrange(1,a.size+1):
+            for i in range(1,a.size+1):
                 o[i] = 2.0*(a[i-1]-o[i-1])+o[i-1]
             return o
         xl = corners(xc, start=xmin)
@@ -135,8 +135,8 @@ class Tough_Mesh():
         # Generate the elements
         self.elems = np.empty( ((len(xl)-1)*(len(yl)-1), 4 ), dtype=np.intc )
         idx = lambda i,j : j*(len(xl))+i
-        for j in xrange(len(yl)-1):
-            for i in xrange(len(xl)-1):
+        for j in range(len(yl)-1):
+            for i in range(len(xl)-1):
                 self.elems[j*(len(xl)-1) + i,:] = \
                   ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
 
