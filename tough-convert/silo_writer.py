@@ -3,7 +3,7 @@ def silo_write_meshfile(fname, X, elems):
         from pyvisfile.silo import SiloFile, IntVector, DB_ZONETYPE_BEAM, DB_ZONETYPE_HEX, \
             DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
     except ImportError:
-        print "Need PyVisFile to write silo files. Use vtk for now."
+        print("Need PyVisFile to write silo files. Use vtk for now.")
         raise
     import numpy as np
 
@@ -36,7 +36,7 @@ def silo_write_datafile(fname,mname,cycle=0, time=0, nodefields={}, cellfields={
             DB_NODECENT, DB_ZONECENT, DBOPT_CYCLE, DBOPT_DTIME, DBOPT_TIME, DB_CLOBBER
         from pyvisfile.silo import DBObjectType as DBOBjectType
     except ImportError:
-        print "Need PyVisFile to write silo files. Use vtk for now."
+        print("Need PyVisFile to write silo files. Use vtk for now.")
         raise
     import numpy as np
     silo = SiloFile(fname, mode=DB_CLOBBER)

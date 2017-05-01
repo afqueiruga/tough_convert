@@ -49,16 +49,16 @@ class Tough_Mesh():
             self.corners,self.elems, self.corner_names = None,None, None
             
         if iname:
-            name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
+            name2index,index2name = load_tough_incon(iname, len(list(self.names.keys())[0]))
 
             # WRONG STILL THE LOOP WON'T PRESERVE ORDER
             #index2name,name2index=filter_by_names(self.names, name2index,index2name, vstack=False)
             # This one will
             itr=0
-            newindex2name = range(len(self.names))
+            newindex2name = list(range(len(self.names)))
             newname2index = {}
             for n in index2name:
-                if self.names.has_key(n):
+                if n in self.names:
                     newindex2name[itr]=n
                     newname2index[n] = itr
                     itr+=1
@@ -120,7 +120,7 @@ class Tough_Mesh():
             o = np.zeros((a.size+1,))
             o[0]=start
             # o[0] = a[0]-0.5*(a[1]-a[0])
-            for i in xrange(1,a.size+1):
+            for i in range(1,a.size+1):
                 o[i] = 2.0*(a[i-1]-o[i-1])+o[i-1]
             return o
         xl = corners(xc, start=xmin)
@@ -135,8 +135,8 @@ class Tough_Mesh():
         # Generate the elements
         self.elems = np.empty( ((len(xl)-1)*(len(yl)-1), 4 ), dtype=np.intc )
         idx = lambda i,j : j*(len(xl))+i
-        for j in xrange(len(yl)-1):
-            for i in xrange(len(xl)-1):
+        for j in range(len(yl)-1):
+            for i in range(len(xl)-1):
                 self.elems[j*(len(xl)-1) + i,:] = \
                   ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
 
@@ -179,12 +179,12 @@ def load_tough_mesh(fname, read_conne = False):
     cell_index2names = []
     cell_groups = []
     keygen = count()
-    group_key = defaultdict( lambda : keygen.next() )
+    group_key = defaultdict( lambda : next(keygen) )
     conne = []
 
     namelength = -1
     f = open(fname,"r")
-    f.next() # Eat the ELEME header
+    next(f) # Eat the ELEME header
     itr = 0
     for l in f:
         if not l.strip(): continue
@@ -217,7 +217,7 @@ def load_tough_mesh(fname, read_conne = False):
         while True:
             if l[0:5]=="CONNE":
                 break
-            l=f.next()
+            l=next(f)
 
         # Read in connections
         for l in f:
@@ -283,13 +283,13 @@ def load_tough_incon(fname, namelength=-1):
     fname should be the INCONN file
     """
     incon = open(fname,"r")
-    incon.next()
+    next(incon)
     name2index = {}
     index2name = []
     itr = 0
     # namelength = 8 # TODO: AD-HOC
     while True:
-        l = incon.next()
+        l = next(incon)
         if namelength == -1:
             namelength = l.find(" ")
         if l[0] == "<" or l[0]==":" or l[0]=='+': break
@@ -297,6 +297,6 @@ def load_tough_incon(fname, namelength=-1):
         name2index[name] = itr
         index2name.append( name )
         itr+=1
-        incon.next()
+        next(incon)
     incon.close()
     return name2index, index2name

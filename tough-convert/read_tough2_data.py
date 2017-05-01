@@ -22,12 +22,12 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             raise StopIteration()
     def read_elem_block(firsttime=False):
         keys = hunt_for_start_of_block().split()[2:]
-        print keys
+        print(keys)
         fields = [ np.zeros(Nelem,dtype=np.double) for k in keys ]
         i=0
         while True:
             # Check out the line
-            l = fh.next()
+            l = next(fh)
             # Skip junk inside of the block
             if len(l)<=3 or l[1:6]=='ELEM.':
                 continue
@@ -36,7 +36,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             # Split the pesky data
             #sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()[1:]
             sp = range(len(keys))
-            for j in xrange(len(keys)):
+            for j in range(len(keys)):
                 try:
                     sp[j] = float(l[ (12+j*12) : (24+j*12) ])
                 except ValueError:
@@ -63,7 +63,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             for i,d in enumerate(fields):
                 fields[i] = np.array(d, dtype=np.double)
                 if read_elem_block.globalnames and nameorder:
-                    for j in xrange(len(fields[i])):
+                    for j in range(len(fields[i])):
                         fields[i][read_elem_block.globalidx[j]] = d[j]
         return {k:d for k,d in zip(keys,fields)}
 
