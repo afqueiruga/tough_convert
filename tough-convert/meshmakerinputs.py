@@ -49,16 +49,16 @@ class Tough_Mesh():
             self.corners,self.elems, self.corner_names = None,None, None
             
         if iname:
-            name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
+            name2index,index2name = load_tough_incon(iname, len(list(self.names.keys())[0]))
 
             # WRONG STILL THE LOOP WON'T PRESERVE ORDER
             #index2name,name2index=filter_by_names(self.names, name2index,index2name, vstack=False)
             # This one will
             itr=0
-            newindex2name = range(len(self.names))
+            newindex2name = list(range(len(self.names)))
             newname2index = {}
             for n in index2name:
-                if self.names.has_key(n):
+                if n in self.names:
                     newindex2name[itr]=n
                     newname2index[n] = itr
                     itr+=1
