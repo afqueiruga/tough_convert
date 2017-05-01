@@ -283,13 +283,13 @@ def load_tough_incon(fname, namelength=-1):
     fname should be the INCONN file
     """
     incon = open(fname,"r")
-    incon.next()
+    next(incon)
     name2index = {}
     index2name = []
     itr = 0
     # namelength = 8 # TODO: AD-HOC
     while True:
-        l = incon.next()
+        l = next(incon)
         if namelength == -1:
             namelength = l.find(" ")
         if l[0] == "<" or l[0]==":" or l[0]=='+': break
@@ -297,6 +297,6 @@ def load_tough_incon(fname, namelength=-1):
         name2index[name] = itr
         index2name.append( name )
         itr+=1
-        incon.next()
+        next(incon)
     incon.close()
     return name2index, index2name
