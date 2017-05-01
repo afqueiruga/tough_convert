@@ -179,12 +179,12 @@ def load_tough_mesh(fname, read_conne = False):
     cell_index2names = []
     cell_groups = []
     keygen = count()
-    group_key = defaultdict( lambda : keygen.next() )
+    group_key = defaultdict( lambda : next(keygen) )
     conne = []
 
     namelength = -1
     f = open(fname,"r")
-    f.next() # Eat the ELEME header
+    next(f) # Eat the ELEME header
     itr = 0
     for l in f:
         if not l.strip(): continue
@@ -217,7 +217,7 @@ def load_tough_mesh(fname, read_conne = False):
         while True:
             if l[0:5]=="CONNE":
                 break
-            l=f.next()
+            l=next(f)
 
         # Read in connections
         for l in f:
