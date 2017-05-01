@@ -38,8 +38,8 @@ def load_plot_data_elem(fname, nameorder=None):
                     #globalidx.append(int(sp[0])-1)
                     globalnames.append(sp[1])
         except:
-            print "Had trouble with this line:"
-            print sp
+            print("Had trouble with this line:")
+            print(sp)
             raise
         
     # Compact format

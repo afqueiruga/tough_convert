@@ -10,7 +10,7 @@ def filter_by_names(filter_names, data_names, data, vstack=True):
         except KeyError:
             pass
     if len(newnames) != len(data_names):
-        print "Element-mismatch: Had to prune ", len(data_names)-len(newnames), "Entries"
+        print("Element-mismatch: Had to prune ", len(data_names)-len(newnames), "Entries")
     #print newelems
     if vstack:
         newdata = np.vstack(newdata)

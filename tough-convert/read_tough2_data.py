@@ -22,7 +22,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             raise StopIteration()
     def read_elem_block(firsttime=False):
         keys = hunt_for_start_of_block().split()[2:]
-        print keys
+        print(keys)
         fields = [ np.zeros(Nelem,dtype=np.double) for k in keys ]
         i=0
         while True:

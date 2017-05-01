@@ -38,8 +38,7 @@ def main():
         # Shuffle the mesh correspondingly
     TMesh = Tough_Mesh( arg.MESH, arg.corners, arg.order, arg.del_groups )
 
-    
-    print "Groups are output according to the following key: ", TMesh.group_key.items()
+    print("Groups are output according to the following key: ", TMesh.group_key.items())
 
     # The silo file always writes the meshfile
     if arg.silo:
@@ -103,13 +102,13 @@ def main():
                 silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data, TMesh.names)):
-            print "Processed step ",t
+            print("Processed step ",t)
             write_step(t,step)
     if arg.tough2data:
         for t,step in enumerate(load_tough2_output(arg.tough2data,
                                                    len(TMesh.centers),len(TMesh.conne),
                                                    TMesh.names)):
-            print "Processed step ",t
+            print("Processed step ",t)
             write_step(t,step)
     
 if __name__=="__main__":
