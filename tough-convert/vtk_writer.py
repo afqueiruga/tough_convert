@@ -45,12 +45,13 @@ def vtk_write_mesh(fname, X, elems, nodefields=None, cellfields=None):
     # Dump all of the node fields
     if nodefields:
         fh.write("POINT_DATA {0}\n".format(X.shape[0]))
-        for n,f in nodefields.iteritems():
+        for n,f in nodefields.items():
             PUTFIELD(n,f)
     # Cell fields now
     if cellfields:
         fh.write("CELL_DATA {0}\n".format(elems.shape[0]))
-        for n,f in cellfields.iteritems():
+        for n,f in cellfields.items():
             PUTFIELD(n,f)
             
     fh.close()
+    print("Wrote file "+fname)

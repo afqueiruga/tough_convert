@@ -3,6 +3,8 @@ import numpy as np
 from itertools import count
 from collections import defaultdict
 
+from util import *
+
 class Tough_Mesh():
     """
     A container class for all the mesh objects. 
@@ -10,27 +12,136 @@ class Tough_Mesh():
     Calls the routines below upon init to fill in its members. Will shuffle itself--overwriting mesh order--before
     returning from init.
     """
-    def __init__(self, mname,cname=None,iname=None ):
-        self.centers, self.names, self.groups, self.group_key, self.conne \
+    def __init__(self, mname,cname=None,iname=None,del_groups=None ):
+        self.centers, self.names,orig_index2name, self.groups, self.group_key, self.conne \
             = load_tough_mesh(mname, False if cname else True) # None evaluates False
+        # TODO: The new filtering features breaks connections. Need to filter those too
+        if del_groups:
+            newcenters = []
+            newnames = {}
+            newgroups = []
+            i = 0
+            del_keys = [ self.group_key[g] for g in del_groups ]
+            for c,n,g in zip(self.centers,orig_index2name,self.groups):
+                #for grp in del_groups:
+                #    if self.group_key[grp] == g:
+                #        continue
+                if g in del_keys:
+                    continue
+                newcenters.append(c)
+                newnames[n] = i
+                newgroups.append(g)
+                i+=1
+            self.centers = np.vstack(newcenters)
+            self.names = newnames
+            self.groups = np.array(newgroups,dtype=np.intc)
+            
         if cname:
-            self.corners,self.elems = load_tough_corners(cname)
+            self.corners,self.elems, self.corner_index2names = load_tough_corners(cname)
+            self.corner_names = { n:i for i,n in enumerate(self.corner_index2names) }
+            # We need to filter out cells that aren't in the mesh to deal with
+            # holes that we've dug ourselves into:
+            self.elems,self.corner_names = filter_by_names(self.names, self.corner_names,self.elems)
+            self.centers,newnames = filter_by_names(self.corner_names, self.names,self.centers)
+            self.groups, newnames = filter_by_names(self.corner_names, self.names,self.groups)
+            self.names = newnames
         else:
-            self.corners,self.elems = None,None
+            self.corners,self.elems, self.corner_names = None,None, None
             
         if iname:
-            name2index,index2name = load_tough_incon(iname, len(self.names.keys()[0]))
+            name2index,index2name = load_tough_incon(iname, len(list(self.names.keys())[0]))
 
+            # WRONG STILL THE LOOP WON'T PRESERVE ORDER
+            #index2name,name2index=filter_by_names(self.names, name2index,index2name, vstack=False)
+            # This one will
+            itr=0
+            newindex2name = list(range(len(self.names)))
+            newname2index = {}
+            for n in index2name:
+                if n in self.names:
+                    newindex2name[itr]=n
+                    newname2index[n] = itr
+                    itr+=1
+                
+            index2name = newindex2name
+            name2index = newname2index
+            
             old2new = make_shuffler( index2name, self.names )
             self.centers = shuffle(old2new, self.centers)
             #self.names = shuffle(old2new, self.names)
             self.names = name2index
-            self.groups = shuffle(old2new, self.groups)
-            if self.conne != None: translate(old2new, self.conne)
-            if self.elems != None: self.elems = shuffle(old2new, self.elems)
-
-        
+            self.groups = shuffle(old2new, self.groups).flatten()
             
+            if self.conne != None:
+                translate(old2new, self.conne)
+            if self.elems != None:
+                if self.corner_names == None:
+                    self.elems = shuffle(old2new, self.elems)
+                else:
+                    corners2new = make_shuffler( index2name, self.corner_names)
+                    self.elems = shuffle(corners2new, self.elems)
+            # AT THIS POINT, self.elems is in the same order as self.centers, following self.names
+            
+        else:
+            # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
+            #name2index = { n:i for i,n in enumerate(self.names) }
+
+            if self.elems != None and self.corner_names != None:
+                index2name = range(len(self.names))
+                for k,i in self.names.iteritems():
+                    index2name[i] = k
+                corners2orig = make_shuffler( index2name, self.corner_names )
+                self.elems = shuffle( corners2orig, self.elems)
+
+                
+    def Generate_Pseudo_Corners(self,xmin,xmax,ymin,ymax):
+        " For 2D, make a simple 2D mesh for FEM/Flac "
+        # First, do we actually need to make them?
+        if self.corners:
+            return
+        # Loop over the element centers and make a grid
+        xs = set()
+        ys = set()
+        if self.centers.shape[1] == 3:
+            for l in self.centers:
+                xs.add(l[0])
+                ys.add(l[2])
+        else:
+            for l in self.centers:
+                xs.add(l[0])
+                ys.add(l[1])
+                
+        xc = np.array(list(xs))
+        yc = np.array(list(ys))
+        xc.sort()
+        yc.sort()
+        # Generate corners based on the cell centers
+        def corners(a,start=0.0):
+            o = np.zeros((a.size+1,))
+            o[0]=start
+            # o[0] = a[0]-0.5*(a[1]-a[0])
+            for i in range(1,a.size+1):
+                o[i] = 2.0*(a[i-1]-o[i-1])+o[i-1]
+            return o
+        xl = corners(xc, start=xmin)
+        yl = corners(yc[range(yc.size-1,-1,-1)], start=ymin)#[range(yc.size,-1,-1)]
+
+        # Make the 2D grid of centers
+        self.corners = np.empty( (len(xl)*len(yl), 2), dtype=np.double )
+        for i,y in enumerate(yl):
+            self.corners[i*len(xl):(i+1)*len(xl),0] = xl[:]
+            self.corners[i*len(xl):(i+1)*len(xl),1] = y
+
+        # Generate the elements
+        self.elems = np.empty( ((len(xl)-1)*(len(yl)-1), 4 ), dtype=np.intc )
+        idx = lambda i,j : j*(len(xl))+i
+        for j in range(len(yl)-1):
+            for i in range(len(xl)-1):
+                self.elems[j*(len(xl)-1) + i,:] = \
+                  ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
+
+
+                
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed
@@ -65,14 +176,15 @@ def load_tough_mesh(fname, read_conne = False):
 
     cell_centers = []
     cell_names = {}
+    cell_index2names = []
     cell_groups = []
     keygen = count()
-    group_key = defaultdict( lambda : keygen.next() )
+    group_key = defaultdict( lambda : next(keygen) )
     conne = []
 
     namelength = -1
     f = open(fname,"r")
-    f.next() # Eat the ELEME header
+    next(f) # Eat the ELEME header
     itr = 0
     for l in f:
         if not l.strip(): continue
@@ -92,7 +204,8 @@ def load_tough_mesh(fname, read_conne = False):
         group = l[15:20]
         cell_centers.append(X)
         
-        cell_names[name] = itr 
+        cell_names[name] = itr
+        cell_index2names.append(name)
         cell_groups.append(group_key[group])
         itr += 1
     cell_centers = np.vstack( cell_centers )
@@ -104,7 +217,7 @@ def load_tough_mesh(fname, read_conne = False):
         while True:
             if l[0:5]=="CONNE":
                 break
-            l=f.next()
+            l=next(f)
 
         # Read in connections
         for l in f:
@@ -116,7 +229,7 @@ def load_tough_mesh(fname, read_conne = False):
         conne = np.vstack( conne )
     
     f.close()
-    return cell_centers, cell_names, cell_groups, group_key, conne
+    return cell_centers, cell_names, cell_index2names, cell_groups, group_key, conne
 
 
 def load_tough_corners(fname):
@@ -127,31 +240,39 @@ def load_tough_corners(fname):
     """
     ndim = 3
     verts = {}
-    cells = {}
+    cells = []
+    elemnames = []
     f = open(fname,"r")
     enum = -1
     elem = []
     for l in f:
-        if l[0:3]==">>>": break
+        if l[0:3]==">>>":
+            continue
         sp = l.split()
-        verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         if len(sp) > ndim+1:
-            cells[enum] = elem
+            cells.append( elem )
             elem = []
-            enum = int(sp[-1])
+            enum = enum+1 #int(sp[-1])
+            elemnames.append(sp[-1])
+        verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         elem.append( int(sp[ndim]) )
-    cells[enum] = elem # Push the last elem that wasn't triggered
-    cells.pop(-1) # Frist loop fringe case
+    cells.append( elem )# Push the last elem that wasn't triggered
+    cells.pop(0) # Frist loop fringe case
     f.close()
     
     # Densify dictionaries in np arrays
     npverts = np.empty((len(verts),ndim),dtype=np.double)
+    # First, we need to make a new translation map, because they're read in
+    # in the original TOTAL BLOCK order, before carving
+    vertskey = {}
+    for newk,(i,v) in enumerate(verts.iteritems()):
+        vertskey[i] = newk
     for i,v in verts.iteritems():
-        npverts[i-1,:] = v
+        npverts[vertskey[i],:] = v
     npcells = np.empty((len(cells),len(cells[1])),dtype=np.intc)
-    for i,v in cells.iteritems():
-        npcells[i-1,:] = [j-1 for j in v]
-    return npverts, npcells
+    for i,v in enumerate(cells):
+        npcells[i,:] = [vertskey[j] for j in v]
+    return npverts, npcells, elemnames
 
     
 def load_tough_incon(fname, namelength=-1):
@@ -162,20 +283,20 @@ def load_tough_incon(fname, namelength=-1):
     fname should be the INCONN file
     """
     incon = open(fname,"r")
-    incon.next()
+    next(incon)
     name2index = {}
     index2name = []
     itr = 0
     # namelength = 8 # TODO: AD-HOC
     while True:
-        l = incon.next()
+        l = next(incon)
         if namelength == -1:
             namelength = l.find(" ")
-        if l[0] == "<" or l[0]==":": break
+        if l[0] == "<" or l[0]==":" or l[0]=='+': break
         name = l[0:namelength]
         name2index[name] = itr
         index2name.append( name )
         itr+=1
-        incon.next()
+        next(incon)
     incon.close()
     return name2index, index2name
