@@ -14,12 +14,12 @@ def load_plot_data_elem(fname, nameorder=None):
     fh = open(fname,"r")
 
     # Read the keys
-    keys = fh.next().split()[2:]
+    keys = next(fh).split()[2:]
     fields = [ [] for k in keys ]
     globalidx = []
     globalnames = []
     # Read the first timestep block
-    fh.next() # Eat the zone block
+    next(fh) # Eat the zone block
     for l in fh:
         if not l.strip() or l[0:4]=="ZONE": break
         sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l).split()
@@ -75,7 +75,7 @@ def load_plot_data_elem(fname, nameorder=None):
         # If we run out of file, then we're done.
         while True:
             try:
-                l = fh.next()
+                l = next(fh)
                 if l[0:4]=="ZONE": break
             except StopIteration:
                 fh.close()
@@ -84,7 +84,7 @@ def load_plot_data_elem(fname, nameorder=None):
         # Refill the preallocated arrays
         i=0
         while i<len(fields[0]):
-            sp = re.sub(r"([^Ee])([-+])",r"\1 \2",fh.next()).split()
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2",next(fh)).split()
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
                     if globalnames and nameorder:
