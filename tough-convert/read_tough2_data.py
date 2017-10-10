@@ -29,7 +29,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             # Check out the line
             l = next(fh)
             # Skip junk inside of the block
-            if len(l)<=3 or l[1:6]=='ELEM.':
+            if len(l)<=3 or l[1:6]=='ELEM.' or l[1:6]=='     ':
                 continue
             # read the pesky element name
             name = l[1:6]
