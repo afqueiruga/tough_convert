@@ -45,8 +45,13 @@ License TBD
 
 If you use this utility in your work, please cite this repository with the following key:
 ```latex
-{
-
+@misc{toughconvert2016,
+  author = {A. F. Queiruga and M. T. Reagan},
+  title = {tough-convert},
+  year = {2016},
+  publisher = {Bitbucket},
+  journal = {Bitbucket repository},
+  howpublished = {https://bitbucket.org/afqueiruga/tough-convert/}
 }
 ```
 Acknowledgements
