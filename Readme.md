@@ -37,10 +37,11 @@ tough_convert can do the following:
 4. Support reordering of the mesh according to a TOUGH inconn file to associate with output filesand
 produce appropriate meshes for TOUGH-FLAC.
 5. Generate rectilinear meshes for FLAC3D or gmsh to correspond to TOUGH meshes.
+
 License
 -------
 
-Copyright (c) 2014, Alejandro Francisco Queiruga and Matt Reagan.
+Copyright (c) 2015-2017, Alejandro Francisco Queiruga and Matt Reagan.
 
 This work is released under the three-clause BSD License. See the file LICENSE for the full text.
 
