@@ -13,10 +13,10 @@ tough\_convert is utility for converting input and output formats for the TOUGH 
 Requirements
 ------------
 
-This is a tool for use with TOUGH+. MeshMaker is needed to generate cell corners (connection visualization is
-possible without the corners.)
+This is a tool for use with TOUGH+ or TOUGH2. MeshMaker is needed to generate cell corners. Connection visualization is
+possible without the corners.
 
-- Python 2.7 (3.0 support is a TODO)
+- Python 2.7 or 3.0
 - numpy
 
 For silo output:
@@ -34,13 +34,16 @@ tough_convert can do the following:
 1. Output raw meshes as VTK files, Silo files, and FLAC3D meshes using MeshMaker's CORNERS output.
 2. Output the dual-graph representation (cell-face-cell) used by tough as VTK and Silo
 3. Output simulation data from PlotDataElem in VTK and Silo formats
-4. Support reordering of the mesh according to a TOUGH inconn file to associate with output files and
+4. Support reordering of the mesh according to a TOUGH inconn file to associate with output filesand
 produce appropriate meshes for TOUGH-FLAC.
-
+5. Generate rectilinear meshes for FLAC3D or gmsh to correspond to TOUGH meshes.
 License
 -------
 
-TBD
+Copyright (c) 2014, Alejandro Francisco Queiruga and Matt Reagan.
+
+This work is released under the three-clause BSD License. See the file LICENSE for the full text.
+
 
 Acknowledgements
 ----------------
