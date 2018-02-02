@@ -29,17 +29,22 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
             # Check out the line
             l = next(fh)
             # Skip junk inside of the block
-            if len(l)<=3 or l[1:6]=='ELEM.':
+            if len(l)<=3 or l[1:6]=='ELEM.' or l[1:6]=='     ':
                 continue
             # read the pesky element name
             name = l[1:6]
             # Split the pesky data
-            #sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()[1:]
-            sp = range(len(keys))
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2", l[6:]).split()[1:]
+            # print sp
+            # sp = range(len(keys))
+            lda = 13
+            off = 12
             for j in range(len(keys)):
                 try:
-                    sp[j] = float(l[ (12+j*12) : (24+j*12) ])
+                    # sp[j] = float(l[ (off+j*lda) : (off+(j+1)*lda) ])
+                    sp[j] = float(sp[j])
                 except ValueError:
+                    print sp[j] #"Value error:", l[ (off+j*lda) : (off+(j+1)*lda) ]
                     sp[j] = 0.0
             # Save data
             if firsttime:
