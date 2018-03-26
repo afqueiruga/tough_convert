@@ -2,8 +2,9 @@ import numpy as np
 import re
 
 from util import *
+from tough_convert.matcher import match_point_clouds
 
-def load_plot_data_elem(fname, nameorder=None):
+def load_plot_data_elem(fname, nameorder=None, X=None):
     """
     Read a Plot_Data_Elem file and spit out the time series value step-by-step.
     returns a generator over the time step values so that it can throw away data.
@@ -16,7 +17,7 @@ def load_plot_data_elem(fname, nameorder=None):
     # Read the keys
     keys = next(fh).split()[2:]
     fields = [ [] for k in keys ]
-    globalidx = []
+    globalidx = None
     globalnames = []
     # Read the first timestep block
     next(fh) # Eat the zone block
@@ -41,9 +42,9 @@ def load_plot_data_elem(fname, nameorder=None):
             print("Had trouble with this line:")
             print(sp)
             raise
-        
-    # Compact format
-    if globalnames and nameorder:
+
+
+    if len(globalnames) and (not nameorder is None):
         globalidx = np.zeros(len(globalnames), dtype = np.intc)
         globalidx[:] = -1
         i=0
@@ -55,7 +56,25 @@ def load_plot_data_elem(fname, nameorder=None):
                 i+=1
             except KeyError:
                 pass
-    if globalnames and nameorder:
+    else:
+        # Compact format
+        if not X is None:
+            keyidx = { k:i for i,k in enumerate(keys) }
+            if keyidx.has_key('x') and keyidx.has_key('y') and keyidx.has_key('z'):
+                Y = np.empty((len(fields[0]),3),dtype=np.double)
+            else:
+                Y = np.empty((len(fields[0]),2),dtype=np.double)
+            try:
+                Y[:,0] = fields[keyidx['x']]
+            except KeyError:
+                Y[:,0] = fields[keyidx['r']]
+            try:
+                Y[:,1] = fields[keyidx['z']]
+            except KeyError:
+                Y[:,1] = fields[keyidx['y']]
+        globalidx = match_point_clouds(X,Y)
+        
+    if not globalidx is None:
         for i,d in enumerate(fields):
             fields[i] = np.empty(len(nameorder), dtype=np.double)
             acopy = np.array(d)
@@ -87,15 +106,15 @@ def load_plot_data_elem(fname, nameorder=None):
             sp = re.sub(r"([^Ee])([-+])",r"\1 \2",next(fh)).split()
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
-                    if globalnames and nameorder:
+                    if not globalidx is None:
                         d[globalidx[i]] = float(s)
                     else:
                         d[i] = float(s)
             else:
-                if nameorder and not sp[1] in nameorder:
+                if (not nameorder is None) and not sp[1] in nameorder:
                     continue
                 for s,d in zip(sp[-len(keys):],fields):
-                    if globalnames and nameorder:
+                    if not globalidx is None:
                         d[globalidx[i]] = float(s)
                     else:
                         d[i] = float(s)

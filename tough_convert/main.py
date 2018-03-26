@@ -101,7 +101,9 @@ def main():
             else:
                 silo_write_datafile(oname,arg.silo_meshname, nodefields=step)
     if arg.data:
-        for t,step in enumerate(load_plot_data_elem(arg.data, TMesh.names)):
+        for t,step in enumerate(load_plot_data_elem(arg.data,
+                                                    nameorder=TMesh.names,
+                                                    X=TMesh.centers)):
             print("Processed step ",t)
             write_step(t,step)
     if arg.tough2data:
