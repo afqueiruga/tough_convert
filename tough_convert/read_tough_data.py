@@ -72,7 +72,7 @@ def load_plot_data_elem(fname, nameorder=None, X=None):
                 Y[:,1] = fields[keyidx['z']]
             except KeyError:
                 Y[:,1] = fields[keyidx['y']]
-        globalidx = match_point_clouds(X,Y)
+            globalidx = match_point_clouds(X,Y)
         
     if not globalidx is None:
         for i,d in enumerate(fields):
