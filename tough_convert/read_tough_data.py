@@ -62,16 +62,19 @@ def load_plot_data_elem(fname, nameorder=None, X=None):
             keyidx = { k:i for i,k in enumerate(keys) }
             if keyidx.has_key('x') and keyidx.has_key('y') and keyidx.has_key('z'):
                 Y = np.empty((len(fields[0]),3),dtype=np.double)
+                Y[:,0] = fields[keyidx['x']]
+                Y[:,1] = fields[keyidx['y']]
+                Y[:,2] = fields[keyidx['z']]
             else:
                 Y = np.empty((len(fields[0]),2),dtype=np.double)
-            try:
-                Y[:,0] = fields[keyidx['x']]
-            except KeyError:
-                Y[:,0] = fields[keyidx['r']]
-            try:
-                Y[:,1] = fields[keyidx['z']]
-            except KeyError:
-                Y[:,1] = fields[keyidx['y']]
+                try:
+                    Y[:,0] = fields[keyidx['x']]
+                except KeyError:
+                    Y[:,0] = fields[keyidx['r']]
+                try:
+                    Y[:,1] = fields[keyidx['z']]
+                except KeyError:
+                    Y[:,1] = fields[keyidx['y']]
             globalidx = match_point_clouds(X,Y)
         
     if not globalidx is None:

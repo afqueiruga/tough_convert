@@ -9,4 +9,5 @@ def match_point_clouds(X, Y):
     """
     tree = KDTree(X)
     d,i = tree.query(Y)
+    #np.save("cache_match_point_clouds_{0}_{1}.npy".format(hash(X),hash(Y)),i)
     return i
