@@ -2,7 +2,7 @@ import numpy as np
 import re
 
 from util import *
-from tough_convert.matcher import match_point_clouds
+from matcher import match_point_clouds
 
 def load_plot_data_elem(fname, nameorder=None, X=None):
     """
