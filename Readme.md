@@ -39,11 +39,34 @@ For silo output:
 Usage
 -----
 
-See tough-convert.py --help. An example usage for TOUGH+ formatted output is
+See `main.py --help`. An example usage for TOUGH+ formatted output is
 ```bash
 python /path/to/tough-convert/main.py MESH --data Plot_Data_Elem --order SAVE --vtk outs/viz.vtk
 ```
 (note the directory `outs/` must exist.)
+
+tough\_convert can also be used from a Python API. It can be used to build an iteration over time snapshots for post processing,
+```python
+import tough_convert as tc
+# Define the list of input files
+data_root = "/home/user/tough/simulation/data/"
+pde_nums = [1,3,8,15,16,17,20,22,25,32,33,37,47,54,55,61,65,66,67]
+save_name = "SAVE_1"
+datafiles = [ data_root+"/Plot_Data_Elem_{0}".format(i)
+              for i in pde_nums ]
+# Load a TOUGH configuration and register empty fields
+TM = tc.Tough_Mesh(data_root+"/MESH",None,data_root+save_name,None)
+# Loop over the data
+for fname in datafiles:
+    for t,step in enumerate(tc.load_plot_data_elem(fname)):
+        print "--- File ",fname," step ",t
+		r_array = step['r']
+        z_array = step['z']
+        for l in ['vol','p','T','S','trE','trSigma',
+                      'trSigma_init','phi','dil']:
+				  do_some_work(step['l'])
+```
+This workflow is particularly useful for performing one-way geomechanical analyses (using the Millstone geomechanical package, for instance) after running a very costly TOUGH flow simulation.
 
 License and Citing
 ------------------
