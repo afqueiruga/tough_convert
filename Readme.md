@@ -5,8 +5,7 @@ tough\_convert
 
 A utility for converting tough mesh files and outputs into other common visualization formats.
 
-Alejandro Francisco Queiruga and Matthew Reagan
-
+Alejandro Francisco Queiruga and Matthew Reagan  
 Lawrence Berkeley National Lab, 2016
 
 Overview
@@ -19,7 +18,7 @@ tough-convert can do the following:
 1. Output raw meshes as VTK files, Silo files, and FLAC3D meshes using MeshMaker's CORNERS output.
 2. Output the dual-graph representation (cell-face-cell) used by tough as VTK and Silo
 3. Output simulation data from PlotDataElem in VTK and Silo formats
-4. Support reordering of the mesh according to a TOUGH inconn file to associate with output files and
+4. Support reordering of the mesh according to a TOUGH incon file to associate with output files and
 produce appropriate meshes for TOUGH-FLAC.
 
 Requirements
@@ -75,15 +74,16 @@ Copyright (c) 2015-2017, Alejandro Francisco Queiruga and Matt Reagan.
 
 This work is released under the three-clause BSD License. See the file LICENSE for the full text.
 
-If you use this utility in your work, please cite this repository with the following key:
+If you use this utility in your work, please cite it through the Zenodo entry linked to this repository:
 ```latex
-@misc{toughconvert2016,
-  author = {A. F. Queiruga and M. T. Reagan},
-  title = {tough-convert},
-  year = {2016},
-  publisher = {Bitbucket},
-  journal = {Bitbucket repository},
-  howpublished = {https://bitbucket.org/afqueiruga/tough-convert/}
+@article{toughconvert_2018,
+  title={tough_convert: Version 1.0},
+  DOI={10.5281/zenodo.1164418},
+  publisher={Zenodo},
+  author={Alejandro F Queiruga and Mattew T Reagan},
+  year={2018},
+  month={Feb}
+  abstractNote={<p>tough_convert is utility for converting input and output formats for the TOUGH family of codes (TOUGH2, TOUGH+, etc.) into formats usable by other scientific visualization packages.</p>},
 }
 ```
 
