@@ -24,7 +24,7 @@ def main():
     # _BAD_ Mesh conversion options -- only for ad hoc 2D manipulations!
     parser.add_argument("--flac3d", type=str)
     parser.add_argument("--gmsh", type=str)
-    
+    parser.add_argument("--order_by_points", action='store_true')
     arg = parser.parse_args()
     
     # Read in Mesh components. Reading CONNE is not needed if CORNERS is supplied.
@@ -103,7 +103,8 @@ def main():
     if arg.data:
         for t,step in enumerate(load_plot_data_elem(arg.data,
                                                     nameorder=TMesh.names,
-                                                    X=TMesh.centers)):
+                                                    X=TMesh.centers,
+                                                    order_by_points=arg.order_by_points)):
             print("Processed step ",t)
             write_step(t,step)
     if arg.tough2data:

@@ -4,7 +4,7 @@ import re
 from util import *
 from matcher import match_point_clouds
 
-def load_plot_data_elem(fname, nameorder=None, X=None):
+def load_plot_data_elem(fname, nameorder=None, X=None, order_by_points=False):
     """
     Read a Plot_Data_Elem file and spit out the time series value step-by-step.
     returns a generator over the time step values so that it can throw away data.
@@ -44,7 +44,8 @@ def load_plot_data_elem(fname, nameorder=None, X=None):
             raise
 
 
-    if len(globalnames) and (not nameorder is None):
+    if not order_by_points and len(globalnames) and (not nameorder is None):
+        print("Name information found in plot_data_elem, using that.")
         globalidx = np.zeros(len(globalnames), dtype = np.intc)
         globalidx[:] = -1
         i=0
@@ -56,8 +57,9 @@ def load_plot_data_elem(fname, nameorder=None, X=None):
                 i+=1
             except KeyError:
                 pass
-    else:
+    elif order_by_points:
         # Compact format
+        print("Generating a correspondence between the mesh and plot_data_elem")
         if not X is None:
             keyidx = { k:i for i,k in enumerate(keys) }
             if keyidx.has_key('x') and keyidx.has_key('y') and keyidx.has_key('z'):
@@ -76,7 +78,8 @@ def load_plot_data_elem(fname, nameorder=None, X=None):
                 except KeyError:
                     Y[:,1] = fields[keyidx['y']]
             globalidx = match_point_clouds(X,Y)
-        
+    else:
+        print("Using mesh ordering or specified order file")
     if not globalidx is None:
         for i,d in enumerate(fields):
             fields[i] = np.empty(len(nameorder), dtype=np.double)
