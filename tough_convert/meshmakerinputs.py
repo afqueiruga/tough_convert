@@ -7,7 +7,7 @@ from util import *
 
 class Tough_Mesh():
     """
-    A container class for all the mesh objects. 
+    A container class for all the mesh objects.
     Not super-neccessary since only one is loaded into memory at a time, but helped keep track with order-shuffling.
     Calls the routines below upon init to fill in its members. Will shuffle itself--overwriting mesh order--before
     returning from init.
@@ -35,7 +35,7 @@ class Tough_Mesh():
             self.centers = np.vstack(newcenters)
             self.names = newnames
             self.groups = np.array(newgroups,dtype=np.intc)
-            
+
         if cname:
             self.corners,self.elems, self.corner_index2names = load_tough_corners(cname)
             self.corner_names = { n:i for i,n in enumerate(self.corner_index2names) }
@@ -47,7 +47,7 @@ class Tough_Mesh():
             self.names = newnames
         else:
             self.corners,self.elems, self.corner_names = None,None, None
-            
+
         if iname:
             name2index,index2name = load_tough_incon(iname, len(list(self.names.keys())[0]))
 
@@ -62,16 +62,16 @@ class Tough_Mesh():
                     newindex2name[itr]=n
                     newname2index[n] = itr
                     itr+=1
-                
+
             index2name = newindex2name
             name2index = newname2index
-            
+
             old2new = make_shuffler( index2name, self.names )
             self.centers = shuffle(old2new, self.centers)
             #self.names = shuffle(old2new, self.names)
             self.names = name2index
             self.groups = shuffle(old2new, self.groups).flatten()
-            
+
             if self.conne is not None:
                 translate(old2new, self.conne)
             if self.elems != None:
@@ -81,7 +81,7 @@ class Tough_Mesh():
                     corners2new = make_shuffler( index2name, self.corner_names)
                     self.elems = shuffle(corners2new, self.elems)
             # AT THIS POINT, self.elems is in the same order as self.centers, following self.names
-            
+
         else:
             # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
             #name2index = { n:i for i,n in enumerate(self.names) }
@@ -93,9 +93,11 @@ class Tough_Mesh():
                 corners2orig = make_shuffler( index2name, self.corner_names )
                 self.elems = shuffle( corners2orig, self.elems)
 
-                
+
     def Generate_Pseudo_Corners(self,xmin,xmax,ymin,ymax):
-        " For 2D, make a simple 2D mesh for FEM/Flac "
+        """
+        For 2D, make a simple 2D mesh for FEM/Flac
+        """
         # First, do we actually need to make them?
         if self.corners:
             return
@@ -110,19 +112,26 @@ class Tough_Mesh():
             for l in self.centers:
                 xs.add(l[0])
                 ys.add(l[1])
-                
         xc = np.array(list(xs))
         yc = np.array(list(ys))
         xc.sort()
         yc.sort()
         # Generate corners based on the cell centers
-        def corners(a,start=0.0):
+        def corners_extrapolate(a,start=0.0):
             o = np.zeros((a.size+1,))
             o[0]=start
             # o[0] = a[0]-0.5*(a[1]-a[0])
             for i in range(1,a.size+1):
                 o[i] = 2.0*(a[i-1]-o[i-1])+o[i-1]
             return o
+        def corners_midpoints(a, start=0.0):
+            o = np.zeros((a.size+1,))
+            o[0] = start
+            for i in range(1,a.size):
+                o[i] = 0.5*(a[i] + a[i-1])
+            o[a.size] = o[a.size-1] + 2.0*(a[-1] - o[a.size-1])
+            return o
+        corners = corners_midpoints
         xl = corners(xc, start=xmin)
         yl = corners(yc[range(yc.size-1,-1,-1)], start=ymin)#[range(yc.size,-1,-1)]
 
@@ -141,7 +150,7 @@ class Tough_Mesh():
                   ( idx(i,j), idx(i+1,j), idx(i+1,j+1), idx(i,j+1) )
 
 
-                
+
 def make_shuffler(new2name, name2old):
     new2old = np.empty( (len(new2name),) , dtype=np.intc)
     #from IPython import embed
@@ -194,7 +203,7 @@ def load_tough_mesh(fname, read_conne = False):
         if namelength == -1:
             namelength = l.find(" ")
             if namelength<5: namelength = 5
-        
+
         name = l[0:namelength]
         x,y,z = l[50:60],l[60:70],l[70:80]
         if not y.strip():
@@ -203,14 +212,14 @@ def load_tough_mesh(fname, read_conne = False):
             X = np.array([ x,y,z ], dtype=np.double)
         group = l[15:20]
         cell_centers.append(X)
-        
+
         cell_names[name] = itr
         cell_index2names.append(name)
         cell_groups.append(group_key[group])
         itr += 1
     cell_centers = np.vstack( cell_centers )
     cell_groups = np.array(cell_groups,np.intc)
-    
+
     # Conditionally read connections
     if read_conne:
         # Chew to the CONNE block
@@ -227,7 +236,7 @@ def load_tough_mesh(fname, read_conne = False):
                                     dtype=np.intc ) )
 
         conne = np.vstack( conne )
-    
+
     f.close()
     return cell_centers, cell_names, cell_index2names, cell_groups, group_key, conne
 
@@ -235,7 +244,7 @@ def load_tough_mesh(fname, read_conne = False):
 def load_tough_corners(fname):
     """
     Load the mesh of the domain; discared by default. Use VTK_output = .TRUE. to obtain from MeshMaker_V2
-    
+
     fname shoud be the CORNERS file
     """
     ndim = 3
@@ -259,7 +268,7 @@ def load_tough_corners(fname):
     cells.append( elem )# Push the last elem that wasn't triggered
     cells.pop(0) # Frist loop fringe case
     f.close()
-    
+
     # Densify dictionaries in np arrays
     npverts = np.empty((len(verts),ndim),dtype=np.double)
     # First, we need to make a new translation map, because they're read in
@@ -274,12 +283,12 @@ def load_tough_corners(fname):
         npcells[i,:] = [vertskey[j] for j in v]
     return npverts, npcells, elemnames
 
-    
+
 def load_tough_incon(fname, namelength=-1):
     """
     Read the inconn file to determine node ordering.
     This routine neglects the intial data; see XXX() in XXX.py
-    
+
     fname should be the INCONN file
     """
     incon = open(fname,"r")
