@@ -35,12 +35,20 @@ For silo output:
 - libsilo
 - pyvisfile
 
+To install it,
+
+```bash
+python setup.py install --prefix=/path/to/opt/
+```
+
+The path will have to be in your python path, so make sure your environment is set up for a local install. It will install a scipt into `opt/bin` called `tough_convert` as well as an importable library `tough_convert` into site-packages.
+
 Usage
 -----
 
 See `main.py --help`. An example usage for TOUGH+ formatted output is
 ```bash
-python /path/to/tough-convert/main.py MESH --data Plot_Data_Elem --order SAVE --vtk outs/viz.vtk
+tough_convert MESH --data Plot_Data_Elem --order SAVE --vtk outs/viz.vtk
 ```
 (note the directory `outs/` must exist.)
 
