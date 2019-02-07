@@ -262,7 +262,7 @@ def load_tough_corners(fname):
             cells.append( elem )
             elem = []
             enum = enum+1 #int(sp[-1])
-            elemnames.append(sp[-1])
+            elemnames.append(sp[-2])
         verts[int(sp[ndim])] = np.array(sp[:ndim],dtype=np.double)
         elem.append( int(sp[ndim]) )
     cells.append( elem )# Push the last elem that wasn't triggered
