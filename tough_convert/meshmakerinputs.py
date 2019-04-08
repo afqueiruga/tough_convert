@@ -231,9 +231,12 @@ def load_tough_mesh(fname, read_conne = False):
         # Read in connections
         for l in f:
             if not l.strip() or l[0]=="<" or l[0] == ">" or l[0] == "+": break
-            conne.append( np.array( [cell_names[l[0:namelength]],
-                                      cell_names[l[namelength:2*namelength]] ] ,
-                                    dtype=np.intc ) )
+            try:
+                conne.append( np.array( [cell_names[l[0:namelength]],
+                                          cell_names[l[namelength:2*namelength]] ] ,
+                                        dtype=np.intc ) )
+            except:
+                print("Connection not found.")
 
         conne = np.vstack( conne )
 
