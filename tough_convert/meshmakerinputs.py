@@ -86,7 +86,7 @@ class Tough_Mesh():
             # Shuffle the corners to match the original ordering, if it won't be shuffled with iname
             #name2index = { n:i for i,n in enumerate(self.names) }
 
-            if self.elems != None and self.corner_names != None:
+            if not self.elems is None and not self.corner_names is None:
                 index2name = range(len(self.names))
                 for k,i in self.names.iteritems():
                     index2name[i] = k
