@@ -108,8 +108,10 @@ def load_plot_data_elem(fname, nameorder=None, X=None, order_by_points=False):
         print("Reading step...")
         # Refill the preallocated arrays
         i=0
+
         while i<len(fields[0]):
-            sp = re.sub(r"([^Ee])([-+])",r"\1 \2",next(fh)).split()
+            l = next(fh)
+            sp = re.sub(r"([^Ee])([-+])",r"\1 \2",l).split()
             if len(sp)==len(keys):
                 for s,d in zip(sp,fields):
                     if not globalidx is None:
