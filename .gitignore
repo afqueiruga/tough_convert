@@ -3,7 +3,9 @@
 .DS_Store
 
 *pyc
-
+build/
+tough_convert.egg-info/
+dist/
 MeshMaker/*
 
 *vtk
