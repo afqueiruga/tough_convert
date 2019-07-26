@@ -44,7 +44,7 @@ def load_tough2_output(fname, Nelem, Nconn, nameorder=None):
                     # sp[j] = float(l[ (off+j*lda) : (off+(j+1)*lda) ])
                     sp[j] = float(sp[j])
                 except ValueError:
-                    print sp[j] #"Value error:", l[ (off+j*lda) : (off+(j+1)*lda) ]
+                    print(sp[j]) #"Value error:", l[ (off+j*lda) : (off+(j+1)*lda) ]
                     sp[j] = 0.0
             # Save data
             if firsttime:
