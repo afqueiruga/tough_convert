@@ -3,7 +3,7 @@ import numpy as np
 from itertools import count
 from collections import defaultdict
 
-from util import *
+from .util import *
 
 class Tough_Mesh():
     """

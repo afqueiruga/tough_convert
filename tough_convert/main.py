@@ -1,12 +1,12 @@
 import argparse
 
-from meshmakerinputs import *
-from vtk_writer import *
-from silo_writer import *
-from gmsh_writer import *
-from flac3d_writer import *
-from read_tough_data import *
-from read_tough2_data import *
+from .meshmakerinputs import *
+from .vtk_writer import *
+from .silo_writer import *
+from .gmsh_writer import *
+from .flac3d_writer import *
+from .read_tough_data import *
+from .read_tough2_data import *
 
 def main():
     parser = argparse.ArgumentParser(description='Convert TOUGH meshes and data output to common formats')
