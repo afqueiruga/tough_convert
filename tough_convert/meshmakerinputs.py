@@ -72,10 +72,10 @@ class Tough_Mesh():
             self.names = name2index
             self.groups = shuffle(old2new, self.groups).flatten()
 
-            if self.conne is not None:
+            if not self.conne is None:
                 translate(old2new, self.conne)
-            if self.elems != None:
-                if self.corner_names == None:
+            if not self.elems is None:
+                if self.corner_names is None:
                     self.elems = shuffle(old2new, self.elems)
                 else:
                     corners2new = make_shuffler( index2name, self.corner_names)
@@ -88,7 +88,7 @@ class Tough_Mesh():
 
             if not self.elems is None and not self.corner_names is None:
                 index2name = range(len(self.names))
-                for k,i in self.names.iteritems():
+                for k,i in self.names.items():
                     index2name[i] = k
                 corners2orig = make_shuffler( index2name, self.corner_names )
                 self.elems = shuffle( corners2orig, self.elems)
@@ -277,9 +277,9 @@ def load_tough_corners(fname):
     # First, we need to make a new translation map, because they're read in
     # in the original TOTAL BLOCK order, before carving
     vertskey = {}
-    for newk,(i,v) in enumerate(verts.iteritems()):
+    for newk,(i,v) in enumerate(verts.items()):
         vertskey[i] = newk
-    for i,v in verts.iteritems():
+    for i,v in verts.items():
         npverts[vertskey[i],:] = v
     npcells = np.empty((len(cells),len(cells[1])),dtype=np.intc)
     for i,v in enumerate(cells):

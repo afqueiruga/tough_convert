@@ -84,7 +84,7 @@ def load_plot_data_elem(fname, nameorder=None, X=None, order_by_points=False):
         for i,d in enumerate(fields):
             fields[i] = np.empty(len(nameorder), dtype=np.double)
             acopy = np.array(d)
-            for j in xrange(len(acopy)):
+            for j in range(len(acopy)):
                 fields[i][globalidx[j]] = acopy[j]
     else:
         for i,d in enumerate(fields):
