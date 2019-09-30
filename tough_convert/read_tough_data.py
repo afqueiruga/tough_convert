@@ -62,7 +62,7 @@ def load_plot_data_elem(fname, nameorder=None, X=None, order_by_points=False):
         print("Generating a correspondence between the mesh and plot_data_elem")
         if not X is None:
             keyidx = { k:i for i,k in enumerate(keys) }
-            if keyidx.has_key('x') and keyidx.has_key('y') and keyidx.has_key('z'):
+            if 'x' in keyidx and 'y' in keyidx and 'z' in keyidx:
                 Y = np.empty((len(fields[0]),3),dtype=np.double)
                 Y[:,0] = fields[keyidx['x']]
                 Y[:,1] = fields[keyidx['y']]
